@@ -2,7 +2,7 @@
 
 ## LLMs - in Review (2024)
 
-> December 2024
+_December 2024_
 
 2024 was the first year where I took LLMs seriously. I successfully hosted a Llama 70b parameter model in production which was used as with [continue.dev](https://www.continue.dev/) for a self-hosted co-pilot replacement, along with a code autocomplete like [Qwen Coder](https://qwenlm.github.io/blog/qwen2.5-coder-family/) or [Deepseek](https://deepseekcoder.github.io/), these were fine replacements and surprisingly robust. [Huggingface's TGI](https://huggingface.co/docs/text-generation-inference/index) along with [Triton Server](https://github.com/triton-inference-server/server) were the main heroes for this project, (Triton was used to serve `onnx` models for embeddings) though I've yet to find a "good" embedding model. At this stage in time, most of the vector database solutions "feel" the same and can all seemingly be trivially hosted via Kubernetes. 
 
@@ -15,7 +15,7 @@ Optimising usage of LLMs at scale is still a massive challenge, particularly whe
 
 ## Python & TypeScript - in Review (2024)
 
-> December 2024
+_December 2024_
 
 One thing that I like to stress is the importance of _tooling_ and [relying on defaults](https://en.wikipedia.org/wiki/Convention_over_configuration). By being able to speak consistently within ones own projects or using commonly seen patterns reduces the mental overhead. These could be folder structures or idioms, especially things which permeate across different programming languages or frameworks. 
 
