@@ -1,2 +1,2 @@
 * [Home](/)
-* [A web log](blog.md)
+* [A Weblog](blog.md)
