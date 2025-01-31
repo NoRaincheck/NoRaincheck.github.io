@@ -16,9 +16,16 @@ There is a separate organisation for web fonts: https://github.com/iosevka-webfo
 
 [Dracula](https://draculatheme.com/), good defaults, consistent experience.
 
-## Text Completion
+## Text Completion via LLMs
 
-[llama-vscode](https://marketplace.visualstudio.com/items?itemName=ggml-org.llama-vscode) with [llama.cpp](https://marketplace.visualstudio.com/items?itemName=ggml-org.llama-vscode). It's proven to be good enough and gets out of the way (plus I can self-host this).
+[llama-vscode](https://marketplace.visualstudio.com/items?itemName=ggml-org.llama-vscode) with [llama.cpp](https://marketplace.visualstudio.com/items?itemName=ggml-org.llama-vscode). It's proven to be good enough and gets out of the way (plus I can self-host this). The medium size variant `ggml-org/Qwen2.5-Coder-3B-Q8_0-GGUF` is good enough for me
+
+```sh
+llama-server \
+    -hf ggml-org/Qwen2.5-Coder-3B-Q8_0-GGUF \
+    --port 8012 -ngl 99 -fa -ub 1024 -b 1024 \
+    --ctx-size 0 --cache-reuse 256
+```
 
 ## Misc
 
