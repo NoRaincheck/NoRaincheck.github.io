@@ -1,10 +1,14 @@
-## Fonts
+## Shell and Fonts
 
 Iosevka - because I work off my laptop screen alot. 
 
 ```sh
 brew install --cask font-iosevka
 ```
+
+[Oh My Zsh](https://ohmyz.sh/#install)  
+[Starship](https://starship.rs/)  
+
 
 ## Themes
 
