@@ -1,9 +1,9 @@
 ## Shell and Fonts
 
-[Iosevka](https://github.com/be5invis/Iosevka) - because I work off my laptop screen alot. 
+[Iosevka](https://github.com/be5invis/Iosevka) - because I work off my laptop screen alot, specifically the two below
 
 ```sh
-brew install --cask font-iosevka
+brew install --cask font-iosevka-slab font-iosevka-etoile
 ```
 
 [Oh My Zsh](https://ohmyz.sh/#install)  
