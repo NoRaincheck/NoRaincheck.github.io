@@ -6,6 +6,8 @@
 brew install --cask font-iosevka-slab font-iosevka-etoile
 ```
 
+There is a separate organisation for web fonts: https://github.com/iosevka-webfonts
+
 [Oh My Zsh](https://ohmyz.sh/#install)  
 [Starship](https://starship.rs/)  
 
