@@ -1,6 +1,6 @@
 ## Shell and Fonts
 
-Iosevka - because I work off my laptop screen alot. 
+[Iosevka](https://github.com/be5invis/Iosevka) - because I work off my laptop screen alot. 
 
 ```sh
 brew install --cask font-iosevka
