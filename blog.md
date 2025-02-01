@@ -1,4 +1,4 @@
-# 2024
+# 2025
 
 ## rqlite - a Production Experiment
 
@@ -9,6 +9,8 @@ _January 2025_
 It just feels like I'm the target audience - someone who wants to quickly push `rqlite` to production with the minimal dependencies and gives me enough to shoot myself in the foot. Compared with `postgres` helm charts, `rqlite` presumes that you _may_ want to just use it as-is, without even a values file. That is a welcome change, whereas almost anything from the bitnami one expects you as a developer will make modifications. Something in that model does not _feel_ quite right. This friction (although seemingly trivial) converted me to use `rqlite` (the other reason is I was using `sqlite` for my tests which meant I didn't need to worry about changing any code to ensure compatibility between different sql dialects). 
 
 This kind of DX is something which I will seek to replicate when/if I build my own libraries for wide consumption. 
+
+# 2024
 
 ## LLMs - in Review (2024)
 
