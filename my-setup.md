@@ -27,6 +27,24 @@ llama-server \
     --ctx-size 0 --cache-reuse 256
 ```
 
+## VSCode Settings
+
+I generally like to leave things to default, since moving to other people's computer and workspaces things don't get confusing. Though the `keybindings.json` I generally stick to is the terminal focus variant:
+
+```json
+[
+    {
+        "key": "ctrl+`",
+        "command": "workbench.action.terminal.focus"
+    },
+    {
+        "key": "ctrl+`",
+        "command": "workbench.action.focusActiveEditorGroup",
+        "when": "terminalFocus"
+    }
+]
+```
+
 ## Misc
 
 [stats](https://formulae.brew.sh/cask/stats), because why not?  
