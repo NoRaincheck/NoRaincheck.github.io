@@ -10,6 +10,8 @@ _February 2025_
 
 I got LLM via prompting to recreate how it may have generated the simple kriging diagram on the wikipedia page. I intentionally got it to do it via brownian bridges rather than the "typical" guassian process way simply because I was interested in brownian bridges. I may have made changes for ease of implementation (I was thinking about re-implementing it using stdlib or in another language as a close approximation), though the "idea" remains. This technique maybe useful if one wants to do something better than sampling over a grid search.
 
+To extend to multiple dimensions, we can make use of tree-parzen like approach to sample per region (chosen heuristically) and presume univariate relationships (which was the approach taken in the original paper, though later approaches used multivariate KDEs). For the purposes of a simplistic implementation, simplifying assumptions will suffice. 
+
 ```python
 # %%
 import numpy as np
