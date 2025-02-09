@@ -1,4 +1,5 @@
 * [Home](/)
 * [A Weblog](blog.md)
+* [Experiments](experiments.md)
 * [Looking Forward](looking-forward.md)
 * [My Setup](my-setup.md)
