@@ -6,6 +6,8 @@ A collection of experiments, code dump etc, that are more for the vibe than for 
 
 ## Brownian Bridges
 
+_February 2025_
+
 I got LLM via prompting to recreate how it may have generated the simple kriging diagram on the wikipedia page. I intentionally got it to do it via brownian bridges rather than the "typical" guassian process way simply because I was interested in brownian bridges. I may have made changes for ease of implementation (I was thinking about re-implementing it using stdlib or in another language as a close approximation), though the "idea" remains. This technique maybe useful if one wants to do something better than sampling over a grid search.
 
 ```python
