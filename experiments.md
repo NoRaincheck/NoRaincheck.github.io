@@ -4,6 +4,450 @@ A collection of experiments, code dump etc, that are more for the vibe than for 
 
 # 2025
 
+## IsoForest with k-NN
+
+Following on the general theme of using random-ness to infer or generate predictions, I've always been very curious about isolation forests, more specifically given the innate measure of "similarity" or "distance" can we use this in the supervised learning scenario via k-NN?
+
+Below is some code which implements this completely using stdlib Python with no dependencies on `numpy`
+
+```python
+import random
+import math
+from collections import Counter
+
+# ----------------------
+# 1) Isolation Forest
+# ----------------------
+
+
+class IsolationTree:
+    """
+    A single isolation tree.
+    """
+
+    def __init__(self, max_depth, seed=None):
+        self.max_depth = max_depth
+        # We'll store a seed to replicate the random picks
+        # If None, we use the global random generator
+        self.seed = seed if seed is not None else random.randint(0, 2**31 - 1)
+
+        self.split_feature = None
+        self.split_value = None
+        self.left = None
+        self.right = None
+        self.size = 0  # number of samples in this node (for leaf nodes)
+
+    def fit(self, data, depth=0, rng=None):
+        """
+        Recursively build the isolation tree.
+
+        :param data: List of data points (each a list of features).
+        :param depth: Current depth of the tree.
+        :param rng: A random.Random instance. If None, we build one using self.seed.
+        """
+        if rng is None:
+            rng = random.Random(self.seed)  # create a local RNG
+
+        n = len(data)
+        self.size = n
+
+        # Base case: stop if max depth reached or not enough samples
+        if depth >= self.max_depth or n <= 1:
+            return
+
+        # Number of features
+        num_features = len(data[0])
+
+        # Randomly pick a feature to split on
+        self.split_feature = rng.randint(0, num_features - 1)
+
+        # Get min and max of that feature
+        feature_values = [point[self.split_feature] for point in data]
+        min_val = min(feature_values)
+        max_val = max(feature_values)
+
+        # If all points are the same on this feature, stop splitting
+        if min_val == max_val:
+            self.split_feature = None
+            return
+
+        # Randomly pick a split value
+        split_val = rng.uniform(min_val, max_val)
+        self.split_value = split_val
+
+        # Partition data into left and right
+        left_data = []
+        right_data = []
+        for point in data:
+            if point[self.split_feature] < split_val:
+                left_data.append(point)
+            else:
+                right_data.append(point)
+
+        # Create child nodes
+        self.left = IsolationTree(self.max_depth)
+        self.right = IsolationTree(self.max_depth)
+
+        # Recursively fit child nodes (reuse the same rng for consistency)
+        self.left.fit(left_data, depth + 1, rng)
+        self.right.fit(right_data, depth + 1, rng)
+
+    def path_length(self, x, depth=0):
+        """
+        Compute the path length of a sample x in this isolation tree.
+        Includes the c_factor for leaf nodes.
+        """
+        # If leaf node or no further split
+        if self.split_feature is None or self.left is None or self.right is None:
+            return depth + c_factor(self.size)
+
+        # Check which branch x goes to
+        if x[self.split_feature] < self.split_value:
+            return self.left.path_length(x, depth + 1)
+        else:
+            return self.right.path_length(x, depth + 1)
+
+    def shared_depth(self, x, y, depth=0):
+        """
+        Compute how many levels x and y share in the same branch
+        before diverging (or reaching a leaf).
+        """
+        # If we are at a leaf node or no further split
+        if self.split_feature is None or self.left is None or self.right is None:
+            return depth
+
+        x_left = x[self.split_feature] < self.split_value
+        y_left = y[self.split_feature] < self.split_value
+
+        if x_left != y_left:
+            return depth
+
+        if x_left:
+            return self.left.shared_depth(x, y, depth + 1)
+        else:
+            return self.right.shared_depth(x, y, depth + 1)
+
+
+def harmonic_number(n):
+    """
+    Return the nth harmonic number H_n = 1 + 1/2 + 1/3 + ... + 1/n
+    """
+    return sum(1.0 / i for i in range(1, n + 1))
+
+
+def c_factor(n):
+    """
+    Normalization factor commonly used in isolation forest scoring:
+        c(n) = 2 * H_{n-1} - 2*(n-1)/n
+    For large n, c(n) ~ 2 * ln(n-1) + gamma - 2*(n-1)/n
+    """
+    if n <= 1:
+        return 0
+    return 2.0 * harmonic_number(n - 1) - 2.0 * (n - 1) / n
+
+
+class IsolationForest:
+    """
+    An Isolation Forest: collection of IsolationTrees.
+    """
+
+    def __init__(self, n_estimators=10, max_samples=256, max_depth=8, random_seed=None):
+        """
+        :param n_estimators: Number of isolation trees.
+        :param max_samples: Subsample size for each tree.
+        :param max_depth: Maximum depth of each tree.
+        :param random_seed: Optional integer seed for reproducibility.
+        """
+        self.n_estimators = n_estimators
+        self.max_samples = max_samples
+        self.max_depth = max_depth
+        self.trees = []
+
+        # For partial_fit, we want a random generator we can use each time
+        # to pick which trees to replace, etc.
+        if random_seed is not None:
+            self._rng = random.Random(random_seed)
+        else:
+            self._rng = random.Random()
+
+    def fit(self, data):
+        """
+        Train the isolation forest on the given dataset.
+
+        :param data: List of data points (each a list of features).
+        """
+        self.trees = []
+        n = len(data)
+
+        for _ in range(self.n_estimators):
+            # Subsample the data
+            if n > self.max_samples:
+                subset = random.sample(data, self.max_samples)
+            else:
+                subset = data[:]
+
+            tree = IsolationTree(self.max_depth)
+            tree.fit(subset)
+            self.trees.append(tree)
+
+    def path_length(self, x):
+        """
+        Compute the average path length of x across all trees.
+
+        :param x: A single data point (list of features).
+        :return: Average path length as a float.
+        """
+        total_path = 0.0
+        for tree in self.trees:
+            total_path += tree.path_length(x)
+        return total_path / float(len(self.trees))
+
+    def anomaly_score(self, x):
+        """
+        Compute the anomaly (outlier) score for a single sample x.
+
+        A common formula is:
+            score(x) = 2^(- E(path_length) / c_factor(max_samples))
+        """
+        avg_path = self.path_length(x)
+        # Classical isolation score:
+        return math.pow(2, -avg_path / c_factor(self.max_samples))
+
+    def predict(self, data, threshold=0.5):
+        """
+        Classify data points as -1 (outlier) or 1 (inlier) based on a threshold.
+        """
+        preds = []
+        for x in data:
+            score = self.anomaly_score(x)
+            preds.append(-1 if score > threshold else 1)
+        return preds
+
+    def similarity_score(self, x, y):
+        """
+        Compute a similarity score between two points x and y, based on
+        shared depth across all trees (normalized by max_depth).
+
+        The higher the score, the more 'similar' the points are
+        in the sense of how the forest partitions the space.
+        """
+        total_shared_depth = 0
+        for tree in self.trees:
+            total_shared_depth += tree.shared_depth(x, y, depth=0)
+
+        avg_shared_depth = total_shared_depth / float(len(self.trees))
+        # Normalize by the maximum possible depth
+        similarity = avg_shared_depth / float(self.max_depth)
+        return similarity
+
+    def partial_fit(self, data, n_replace=1):
+        """
+        *Heuristic* partial fit that:
+          1) Takes the new minibatch 'data'
+          2) Randomly picks 'n_replace' trees to remove
+          3) Builds 'n_replace' new trees on the minibatch (up to max_samples)
+             reusing seeds from the removed trees if desired
+        """
+        if not self.trees:
+            # If forest was empty, just do a fresh fit with n_estimators
+            self.fit(data)
+            return
+
+        # Bound n_replace by the current number of trees
+        n_replace = min(n_replace, len(self.trees))
+
+        # 1) Randomly pick which trees to remove
+        remove_indices = self._rng.sample(range(len(self.trees)), n_replace)
+        remove_indices = set(remove_indices)
+
+        # 2) For each tree to remove, gather its seed to reuse
+        removed_seeds = []
+        kept_trees = []
+        for i, tree in enumerate(self.trees):
+            if i in remove_indices:
+                removed_seeds.append(tree.seed)
+            else:
+                kept_trees.append(tree)
+
+        # 3) Build n_replace new trees on the minibatch
+        #    If minibatch larger than max_samples, sample
+        n_data = len(data)
+        if n_data > self.max_samples:
+            subset = self._rng.sample(data, self.max_samples)
+        else:
+            subset = data[:]
+
+        new_trees = []
+        for seed in removed_seeds:
+            # We create a new tree reusing the old tree's seed
+            new_tree = IsolationTree(self.max_depth, seed=seed)
+            new_tree.fit(subset)
+            new_trees.append(new_tree)
+
+        # 4) Update self.trees
+        self.trees = kept_trees + new_trees
+
+    def __len__(self):
+        """
+        Number of trees in the forest.
+        """
+        return len(self.trees)
+
+
+# -------------------------------------
+# 2) IsoKNNClassifier (Meta-Learner)
+# -------------------------------------
+
+
+class IsoKNNClassifier:
+    """
+    A classifier that uses Isolation Forest to define a similarity metric,
+    then applies a k-Nearest Neighbors approach based on highest similarity.
+    """
+
+    def __init__(self, k=3, iso_forest_params=None):
+        """
+        :param k: Number of neighbors to consider.
+        :param iso_forest_params: Dictionary of parameters for IsolationForest.
+        """
+        self.k = k
+        if iso_forest_params is None:
+            iso_forest_params = {}
+        self.iso_forest = IsolationForest(**iso_forest_params)
+        self.X_train = []
+        self.y_train = []
+
+    def fit(self, X, y):
+        """
+        Fit the IsoKNN model: store training data and build the Isolation Forest.
+
+        :param X: List of feature vectors.
+        :param y: List of corresponding labels (same order).
+        """
+        # Make sure X and y are in a usable structure
+        self.X_train = X
+        self.y_train = y
+
+        # Train the Isolation Forest on X
+        self.iso_forest.fit(X)
+
+    def predict(self, X_test):
+        """
+        Predict labels for a list of test points using the IsoForest-based kNN.
+
+        :param X_test: List of feature vectors for testing.
+        :return: List of predicted labels.
+        """
+        predictions = []
+        for x in X_test:
+            # 1. Compute similarity to each training point
+            similarities = []
+            for i, x_train in enumerate(self.X_train):
+                sim = self.iso_forest.similarity_score(x, x_train)
+                similarities.append((sim, self.y_train[i]))
+
+            # 2. Sort by similarity in descending order
+            similarities.sort(key=lambda tup: tup[0], reverse=True)
+
+            # 3. Get top-k neighbors
+            top_k = similarities[: self.k]
+
+            # 4. Majority vote among neighbors
+            labels = [label for (_, label) in top_k]
+            label_count = Counter(labels)
+            # Pick the label with the highest count; break ties arbitrarily
+            majority_label = label_count.most_common(1)[0][0]
+            predictions.append(majority_label)
+
+        return predictions
+
+
+# ----------------
+# Example Usage
+# ----------------
+
+
+def main():
+    # Synthetic training data
+    X_train = [
+        [0.1, 0.2],  # label 0
+        [0.2, 0.1],  # label 0
+        [0.15, 0.18],  # label 0
+        [5.0, 6.0],  # label 1
+        [5.2, 5.9],  # label 1
+        [10.0, 10.0],  # label 2
+    ]
+    y_train = [0, 0, 0, 1, 1, 2]
+
+    # Define test points
+    X_test = [
+        [0.15, 0.17],  # Close to first cluster => likely label 0
+        [5.1, 6.1],  # Close to second cluster => likely label 1
+        [10.1, 9.9],  # Close to the outlier => likely label 2
+        [4.9, 5.8],  # Possibly near cluster (5.0, 6.0) => label 1
+    ]
+
+    # Create and fit IsoKNNClassifier
+    # We'll use an Isolation Forest with a few trees for demonstration.
+    iso_knn = IsoKNNClassifier(
+        k=2,
+        iso_forest_params={
+            "n_estimators": 5,
+            "max_samples": 4,
+            "max_depth": 5,
+            "random_seed": 42,
+        },
+    )
+    iso_knn.fit(X_train, y_train)
+
+    # Predict
+    preds = iso_knn.predict(X_test)
+    for x, label in zip(X_test, preds):
+        print(f"Test point {x} => predicted label: {label}")
+
+
+def demo_partial_fit():
+    """
+    Minimal demonstration of partial_fit usage.
+    """
+    # Original data
+    data_initial = [
+        [0.1, 0.2],
+        [0.2, 0.1],
+        [0.15, 0.18],
+        [5.0, 6.0],
+        [5.2, 5.9],
+        [4.9, 6.2],
+    ]
+
+    # New data (minibatch) to incorporate
+    data_minibatch = [[10.0, 10.0], [10.1, 9.9]]
+
+    # Build an initial forest
+    iso_f = IsolationForest(n_estimators=4, max_depth=5, max_samples=3, random_seed=42)
+    iso_f.fit(data_initial)
+    print("Initial number of trees =", len(iso_f))
+
+    # Check anomaly scores before partial_fit
+    outlier_score_before = iso_f.anomaly_score([10.0, 10.0])
+
+    # partial_fit with new data, replacing 2 trees
+    iso_f.partial_fit(data_minibatch, n_replace=2)
+    print("Number of trees after partial_fit =", len(iso_f))
+
+    # Check anomaly scores after partial_fit
+    outlier_score_after = iso_f.anomaly_score([10.0, 10.0])
+
+    print(f"Outlier score (before) = {outlier_score_before:.3f}")
+    print(f"Outlier score (after)  = {outlier_score_after:.3f}")
+
+
+if __name__ == "__main__":
+    main()
+    print("== Partial fit demo ==")
+    demo_partial_fit()
+```
+
 ## Brownian Bridges
 
 _February 2025_
