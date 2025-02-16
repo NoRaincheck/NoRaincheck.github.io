@@ -6,9 +6,11 @@ A collection of experiments, code dump etc, that are more for the vibe than for 
 
 ## IsoForest with k-NN
 
+_February 2025_
+
 Following on the general theme of using random-ness to infer or generate predictions, I've always been very curious about isolation forests, more specifically given the innate measure of "similarity" or "distance" can we use this in the supervised learning scenario via k-NN?
 
-Below is some code which implements this completely using stdlib Python with no dependencies on `numpy`
+Below is some code which implements this completely using stdlib Python with no dependencies on `numpy`. Written with heavy assistance from LLMs.
 
 ```python
 import random
