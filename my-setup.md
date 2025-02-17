@@ -45,6 +45,31 @@ I generally like to leave things to default, since moving to other people's comp
 ]
 ```
 
+## GPG
+
+```sh
+brew install gpg
+gpg --gen-key
+# by default for self stuff, use symmetric encryption
+```
+
+Ensure in `~/.zshrc`
+
+```
+GPG_TTY=$(tty)
+export GPG_TTY
+```
+
+Example usage:
+
+```sh
+echo foo | gpg --symmetric > foo.gpg
+gpg --decrypt foo.gpg
+# to clipboard
+gpg --decrypt foo.gpg | pbcopy
+```
+
+
 ## Misc
 
 [stats](https://formulae.brew.sh/cask/stats), because why not?  
