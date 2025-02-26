@@ -1,14 +1,12 @@
 ## Shell and Fonts
 
-[Iosevka](https://github.com/be5invis/Iosevka) - because I work off my laptop screen alot, specifically the two below
+[Iosevka](https://github.com/be5invis/Iosevka) - because I work off my laptop screen alot, specifically the `slab` variant.
 
 ```sh
 brew install --cask font-iosevka-slab
 ```
 
-For general "stuff", I currently enjoying the router font aesthetic, which is [used in this blog](https://heardacat.github.io/nationalpark-webfont/).
-
-There is a separate organisation for web fonts: https://github.com/iosevka-webfonts
+For general "stuff", I currently enjoying the "gothic" router font aesthetic, which is [used in this blog](https://heardacat.github.io/nationalpark-webfont/).
 
 For my shell:  
 - [Oh My Zsh](https://ohmyz.sh/#install)  
