@@ -3,14 +3,16 @@
 [Iosevka](https://github.com/be5invis/Iosevka) - because I work off my laptop screen alot, specifically the two below
 
 ```sh
-brew install --cask font-iosevka-slab font-iosevka-etoile
+brew install --cask font-iosevka-slab
 ```
+
+For general "stuff", I currently enjoying the "gothic" the router font aesthetic, mainly its rough and ready, comic-book style that reminds me that my writings are still a perpetual "draft" state.
 
 There is a separate organisation for web fonts: https://github.com/iosevka-webfonts
 
-[Oh My Zsh](https://ohmyz.sh/#install)  
-[Starship](https://starship.rs/)  
-
+For my shell:  
+- [Oh My Zsh](https://ohmyz.sh/#install)  
+- [Starship](https://starship.rs/)  
 
 ## Themes
 
