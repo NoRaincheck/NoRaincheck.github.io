@@ -16,7 +16,7 @@ For my shell:
 
 ## Themes
 
-[Dracula](https://draculatheme.com/), good defaults, consistent experience.
+[Dracula](https://draculatheme.com/), good defaults, consistent experience. Alternatives I've considered are [Catppuccin](https://catppuccin.com/) which I actually really, really like, and [Rosé Pine](https://rosepinetheme.com/) which I've briefly toyed with, but haven't taken seriously. 
 
 ## Text Completion via LLMs
 
