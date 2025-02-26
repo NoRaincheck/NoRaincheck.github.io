@@ -6,7 +6,7 @@
 brew install --cask font-iosevka-slab
 ```
 
-For general "stuff", I currently enjoying the "gothic" the router font aesthetic, mainly its rough and ready, comic-book style that reminds me that my writings are still a perpetual "draft" state.
+For general "stuff", I currently enjoying the router font aesthetic, which is [used in this blog](https://heardacat.github.io/nationalpark-webfont/).
 
 There is a separate organisation for web fonts: https://github.com/iosevka-webfonts
 
