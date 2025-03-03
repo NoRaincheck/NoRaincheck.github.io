@@ -2,6 +2,8 @@
 
 Here are things that I didn't invent, but I find myself constantly referring back to.
 
+---
+
 ### Architecture Decision Record
 
 My go-to template is the [Alexandrian Pattern]([https://github.com/jamesmh/architecture_decision_record/blob/master/adr_template_for_alexandrian_pattern.md](https://github.com/joelparkerhenderson/architecture-decision-record/tree/main/locales/en/templates/decision-record-template-for-alexandrian-pattern)), which is based on [Design Pattern from Christopher Alexander](https://en.wikipedia.org/wiki/Design_pattern)
