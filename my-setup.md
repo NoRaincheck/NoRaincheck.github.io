@@ -47,6 +47,8 @@ I generally like to leave things to default, since moving to other people's comp
 
 ## gitconfig
 
+Stolen from [here](https://blog.gitbutler.com/how-git-core-devs-configure-git/).
+
 ```ini
 # ~/.gitconfig 
 [column]
