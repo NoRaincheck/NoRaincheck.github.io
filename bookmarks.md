@@ -64,3 +64,8 @@ It provides you with a good starter template.
 
 Color scheme overrides can be done just by adding an attribute to the html tag, e.g. `<html data-theme="light">`.
 
+---
+
+### Organising Stuff
+
+I keep coming back to [Johnny.Decimal](https://johnnydecimal.com/). It has been great for personal, admin things - though I haven't used it for work or programming related projects. On that front still seeing if I can do better. This blog site "setup" (or lack thereof) has definitely been influenced by Johnny Decimal.
