@@ -32,3 +32,35 @@ My go-to template is the [Alexandrian Pattern]([https://github.com/jamesmh/archi
 * Consequences
   * Explains the results of the decision over the long term.
   * Did it work, not work, was changed, upgraded, etc.
+ 
+---
+
+### HTML Template
+
+[Pico](https://picocss.com/) has proven to me to be a good enough HTML template with sensible defaults. It can be classless if you want it to be, or you can have some extras on top. 
+
+It provides you with a good starter template.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    >
+    <title>Hello world!</title>
+  </head>
+  <body>
+    <main class="container">
+      <h1>Hello world!</h1>
+    </main>
+  </body>
+</html>
+```
+
+Color scheme overrides can be done just by adding an attribute to the html tag, e.g. `<html data-theme="light">`.
+
