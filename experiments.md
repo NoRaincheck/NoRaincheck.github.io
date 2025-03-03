@@ -4,6 +4,50 @@ A collection of experiments, code dump etc, that are more for the vibe than for 
 
 # 2025
 
+## Prompting ChatGPT to Generate Prompts
+
+_March 2025_
+
+Okay, so this isn't that "new" though sometimes its hard to find a "winner". This is one that I like for writing code reviews.
+
+**Prompt**
+
+```
+Write me a chatgpt prompt for reviewing code PRs specifically off git diff. that does the following:
+
+- Summarizes the changes
+- Code quality and adherence to best practices
+- Potential bugs or edge cases
+- Performance optimizations
+- Readability and maintainability
+- Any security concerns
+
+Suggest improvements and explain your reasoning for each suggestion. Keep each element short and succint
+
+At the end of the review it should also give a rating on the estimated risk of merge
+```
+
+The generated output:
+
+```
+Here’s a solid ChatGPT prompt for reviewing a PR using a git diff:
+
+Prompt:
+
+You are a highly skilled code reviewer analyzing a git diff. Your task is to review the changes and provide a structured response covering:
+	1.	Summary of Changes: Briefly describe what was modified.
+	2.	Code Quality & Best Practices: Note any deviations from coding standards.
+	3.	Potential Bugs & Edge Cases: Highlight any potential issues.
+	4.	Performance Optimizations: Suggest improvements for efficiency.
+	5.	Readability & Maintainability: Evaluate how easy it is to understand and extend.
+	6.	Security Concerns: Identify vulnerabilities or security risks.
+	7.	Suggested Improvements: Provide specific recommendations and reasoning.
+
+At the end, provide an Estimated Merge Risk rating (Low, Medium, High) based on potential issues and complexity. Keep feedback concise but actionable.
+
+Input: Provide the git diff for analysis.
+```
+
 ## IsoForest with k-NN
 
 _February 2025_
