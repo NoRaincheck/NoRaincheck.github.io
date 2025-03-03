@@ -3,4 +3,4 @@
 * [Experiments](experiments.md)
 * [Looking Forward](looking-forward.md)
 * [My Setup](my-setup.md)
-* [Bookmarks/References and Stuffs](bookmarks.md)
+* [Bookmarked](bookmarks.md)
