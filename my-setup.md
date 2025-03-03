@@ -73,8 +73,6 @@ Stolen from [here](https://blog.gitbutler.com/how-git-core-devs-configure-git/).
     pruneTags = true
     all = true
 
-# why the hell not?
-
 [help]
     autocorrect = prompt
 [commit]
