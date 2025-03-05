@@ -2,6 +2,58 @@
 
 # 2025
 
+## Dependency Injection via SQLModels isn't worth it
+
+_February 2025_
+
+It's been something I've been mulling over for a while now. I'm not convinced using `Session` with [Dependency Injection is worth it](https://sqlmodel.tiangolo.com/tutorial/fastapi/session-with-dependency/?h=depend). The abstraction is nice, visually, but the lack of context makes things really hard to reason with, especially if you're doing something beyond a simple getter/setter. This happens if you're building an application that performs a flow or some business logic rather than a pure CRUD, then you may need to do multiple commits in a single query which may _not_ need to all be rolled back. This of course breaks some kind of assumption to do with "a single unit of work". 
+
+I encountered this in one of the more painful ways, and instead reverted back to how the `sqlalchemy` orm does it. With that in mind, I thought this is a quick note to remind myself to beware, think and plan things out better, because I undoubtedly will try something stupid like this again. 
+
+Using `sqlalchemy`:
+
+```py
+from contextlib import contextmanager
+
+from sqlalchemy.orm import sessionmaker
+from sqlmodel import Session as SQLModelSession
+from sqlmodel import create_engine
+
+engine = create_engine(...)
+SessionDB = sessionmaker(class_=SQLModelSession, autoflush=False, bind=engine)
+
+
+def get_session():
+    return SessionDB(bind=engine, expire_on_commit=False)
+
+
+@contextmanager
+def session_scope():
+    session = get_session()
+    try:
+        yield session
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()
+```
+
+Then the corresponding usage is the very natural:
+
+```py
+from sqlmodel import col, select
+
+with session_scope() as session:
+    # do stuff here...for example
+    statement = (
+        select(MyTable)
+        .where(MyTable.column_name == value)
+        .order_by(col(MyTable.column_name).desc())
+    )
+```
+
 ## rqlite - a Production Experiment
 
 _January 2025_
