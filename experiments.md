@@ -588,6 +588,8 @@ if __name__ == "__main__":
     demo_partial_fit()
 ```
 
+Commentary from the future: this approach is very similar to Mondrian Trees, in which the random partitions are induced by a Mondrian Process. I should include a "fast approximation" to Mondrian processes and expand it to multi-dimensions using standard lib in the future. 
+
 ## Brownian Bridges
 
 _February 2025_
