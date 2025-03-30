@@ -4,6 +4,34 @@ Here are things that I didn't invent, but I find myself constantly referring bac
 
 ---
 
+### `uv` Script Mode
+
+See [here](https://docs.astral.sh/uv/guides/scripts/#creating-a-python-script)
+
+`uv` now supports script mode. This is quite amazing for one-off scripts rather than publishing and overloading pypi, you can just share a single script and `uv` will correctly pull depdencies (reminds me of [flit](https://flit.pypa.io/en/stable/)). 
+
+**Usage**
+
+Start by using `--script` mode
+
+```sh
+uv init --script example.py --python 3.12
+```
+
+Then you can add dependencies. This will update the `example.py` with the appropriate header
+
+```sh
+uv add --script example.py 'requests<3' 'rich'
+```
+
+If one then follows up by adding the shebang
+
+```py
+#!/usr/bin/env -S uv run --script
+```
+
+Then the script will be completely runnable as a normal `cli` command!
+
 ### Architecture Decision Record
 
 My go-to template is the [Alexandrian Pattern]([https://github.com/jamesmh/architecture_decision_record/blob/master/adr_template_for_alexandrian_pattern.md](https://github.com/joelparkerhenderson/architecture-decision-record/tree/main/locales/en/templates/decision-record-template-for-alexandrian-pattern)), which is based on [Design Pattern from Christopher Alexander](https://en.wikipedia.org/wiki/Design_pattern)
