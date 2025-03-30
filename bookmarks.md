@@ -30,6 +30,22 @@ If one then follows up by adding the shebang
 #!/usr/bin/env -S uv run --script
 ```
 
+So that the resulting file looks something like
+
+```py
+#!/usr/bin/env -S uv run --script
+# /// script
+# dependencies = [
+#   "requests<3",
+#   "rich",
+# ]
+# ///
+
+import requests
+from rich.pretty import pprint
+...
+```
+
 Then the script will be completely runnable as a normal `cli` command!
 
 ### Architecture Decision Record
