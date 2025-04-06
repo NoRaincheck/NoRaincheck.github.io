@@ -1,4 +1,4 @@
-Welcome to my blog. 
+**Welcome to my blog**
 
 A collection of thoughts - short essays, reflections, personal opinions  
 A collection of experiments - 'vibe' coding, things that may not work, tests and things which maybe purposely imperfect or incomplete  
