@@ -142,35 +142,59 @@ class Array:
             return [(k + n if k < 0 else k) for k in key]
         else:
             raise TypeError(f"Invalid index type: {type(key)}")
-
     def __repr__(self):
         data_copy = deepcopy(self.data)
         max_string_length = 0
         is_numeric_data = True
-        # iterate over the data incl. list of lists and convert all values to json values
-        for i, row in enumerate(data_copy):
-            for j, col in enumerate(row):
-                data_copy[i][j] = json.dumps(col)
-                max_string_length = max(max_string_length, len(data_copy[i][j]))
-                if not isinstance(col, (int, float)):
-                    is_numeric_data = False
 
-        # pad the strings with spaces to the max length
-        for i, row in enumerate(data_copy):
-            for j, col in enumerate(row):
-                if is_numeric_data:
-                    data_copy[i][j] = (
-                        data_copy[i][j].rjust(max_string_length).replace(" ", "_")
-                    )
-                else:
-                    data_copy[i][j] = data_copy[i][j].ljust(max_string_length)
+        def process_value(val):
+            nonlocal is_numeric_data
+            str_val = json.dumps(val)
+            if not isinstance(val, (int, float)):
+                is_numeric_data = False
+            return str_val
 
-        output = json.dumps(data_copy, indent=2)
-        output = output.replace('"', "")
-        output = re.sub(r"\n\s*(?=[^\s\[]|])", " ", output)
-        if is_numeric_data:
-            output = output.replace("_", " ")
-        output = re.sub(r"\]\s*\]", "]\n]", output)
+        def format_value(str_val):
+            if is_numeric_data:
+                return str_val.rjust(max_string_length).replace(" ", "_")
+            return str_val.ljust(max_string_length)
+
+        if len(self.shape) == 2:
+            # Process 2D array values
+            for i, row in enumerate(data_copy):
+                for j, col in enumerate(row):
+                    data_copy[i][j] = process_value(col)
+                    max_string_length = max(max_string_length, len(data_copy[i][j]))
+
+            # Format values
+            for i, row in enumerate(data_copy):
+                for j, col in enumerate(row):
+                    data_copy[i][j] = format_value(data_copy[i][j])
+
+            # Format output
+            output = json.dumps(data_copy, indent=2)
+            output = output.replace('"', "")
+            output = re.sub(r"\n\s*(?=[^\s\[]|])", " ", output)
+            if is_numeric_data:
+                output = output.replace("_", " ")
+            output = re.sub(r"\]\s*\]", "]\n]", output)
+
+        else:  # 1D array
+            # Process 1D array values
+            for i, val in enumerate(data_copy):
+                data_copy[i] = process_value(val)
+                max_string_length = max(max_string_length, len(data_copy[i]))
+
+            # Format values
+            for i, val in enumerate(data_copy):
+                data_copy[i] = format_value(data_copy[i])
+
+            # Format output
+            output = json.dumps(data_copy)
+            output = output.replace('"', "")
+            if is_numeric_data:
+                output = output.replace("_", " ")
+
         return output
 
 
