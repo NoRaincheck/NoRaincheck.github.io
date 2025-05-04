@@ -4,6 +4,204 @@ A collection of experiments, code dump etc, that are more for the vibe than for 
 
 # 2025
 
+## stdlib Numpy for when you don't need all of Numpy
+
+_May 2025_
+
+Sometimes you just want the convenience of numpy-like notation for slicing, and setting values. 
+
+```py
+from copy import deepcopy
+import json
+import re
+
+
+class Array:
+    def __init__(self, data):
+        # Accepts list, list of lists, or another Array
+        if isinstance(data, Array):
+            self.data = self._deepcopy(data.data)
+        else:
+            self.data = self._deepcopy(data)
+        self._update_shape()
+
+    def _deepcopy(self, data):
+        if isinstance(data, list):
+            if data and isinstance(data[0], list):
+                return [row[:] for row in data]
+            else:
+                return data[:]
+        return data
+
+    def _update_shape(self):
+        if isinstance(self.data, list):
+            if self.data and isinstance(self.data[0], list):
+                self.shape = (len(self.data), len(self.data[0]))
+            else:
+                self.shape = (len(self.data),)
+        else:
+            self.shape = ()
+
+    def __getitem__(self, key):
+        if len(self.shape) == 2:
+            if isinstance(key, tuple):
+                row_key, col_key = key
+                rows = self._process_slice(row_key, axis=0)
+                cols = self._process_slice(col_key, axis=1)
+                result = [[self.data[i][j] for j in cols] for i in rows]
+                if len(result) == 1 and len(result[0]) == 1:
+                    return result[0][0]
+                if len(result) == 1:
+                    return Array(result[0])
+                if len(result[0]) == 1:
+                    return Array([row[0] for row in result])
+                return Array(result)
+            else:
+                # Single row
+                rows = self._process_slice(key, axis=0)
+                result = [self.data[i][:] for i in rows]
+                if len(result) == 1:
+                    return Array(result[0])
+                return Array(result)
+        elif len(self.shape) == 1:
+            if isinstance(key, int):
+                idx = key
+                if idx < 0:
+                    idx += self.shape[0]
+                if idx < 0 or idx >= self.shape[0]:
+                    raise IndexError("index out of range")
+                return self.data[idx]
+            elif isinstance(key, slice) or isinstance(key, list):
+                idxs = self._process_slice(key, axis=0)
+                result = [self.data[i] for i in idxs]
+                return Array(result)
+            else:
+                raise TypeError(f"Invalid index type: {type(key)}")
+        else:
+            raise IndexError("Array is empty or has invalid shape.")
+
+    def __setitem__(self, key, value):
+        if len(self.shape) == 2:
+            if isinstance(key, tuple):
+                row_key, col_key = key
+                rows = self._process_slice(row_key, axis=0)
+                cols = self._process_slice(col_key, axis=1)
+                if isinstance(value, Array):
+                    value = value.data
+                # Broadcasting for scalar assignment
+                if not isinstance(value, list) or (
+                    value and not isinstance(value[0], list)
+                ):
+                    value = [[value for _ in cols] for _ in rows]
+                elif value and not isinstance(value[0], list):
+                    value = [value] * len(rows)
+                for i, row in enumerate(rows):
+                    for j, col in enumerate(cols):
+                        self.data[row][col] = value[i][j]
+            else:
+                rows = self._process_slice(key, axis=0)
+                if isinstance(value, Array):
+                    value = value.data
+                if value and not isinstance(value[0], list):
+                    value = [value] * len(rows)
+                for i, row in enumerate(rows):
+                    self.data[row] = value[i]
+        elif len(self.shape) == 1:
+            if isinstance(key, int):
+                idx = key
+                if idx < 0:
+                    idx += self.shape[0]
+                if idx < 0 or idx >= self.shape[0]:
+                    raise IndexError("index out of range")
+                self.data[idx] = value
+            elif isinstance(key, slice) or isinstance(key, list):
+                idxs = self._process_slice(key, axis=0)
+                if isinstance(value, Array):
+                    value = value.data
+                # Broadcasting for scalar assignment
+                if not isinstance(value, list):
+                    value = [value] * len(idxs)
+                if len(value) != len(idxs):
+                    raise ValueError("could not broadcast input array to shape")
+                for i, idx in enumerate(idxs):
+                    self.data[idx] = value[i]
+            else:
+                raise TypeError(f"Invalid index type: {type(key)}")
+        else:
+            raise IndexError("Array is empty or has invalid shape.")
+
+    def _process_slice(self, key, axis):
+        n = self.shape[axis]
+        if isinstance(key, int):
+            if key < 0:
+                key += n
+            return [key]
+        elif isinstance(key, slice):
+            return list(range(*key.indices(n)))
+        elif isinstance(key, list):
+            return [(k + n if k < 0 else k) for k in key]
+        else:
+            raise TypeError(f"Invalid index type: {type(key)}")
+
+    def __repr__(self):
+        data_copy = deepcopy(self.data)
+        max_string_length = 0
+        is_numeric_data = True
+        # iterate over the data incl. list of lists and convert all values to json values
+        for i, row in enumerate(data_copy):
+            for j, col in enumerate(row):
+                data_copy[i][j] = json.dumps(col)
+                max_string_length = max(max_string_length, len(data_copy[i][j]))
+                if not isinstance(col, (int, float)):
+                    is_numeric_data = False
+
+        # pad the strings with spaces to the max length
+        for i, row in enumerate(data_copy):
+            for j, col in enumerate(row):
+                if is_numeric_data:
+                    data_copy[i][j] = (
+                        data_copy[i][j].rjust(max_string_length).replace(" ", "_")
+                    )
+                else:
+                    data_copy[i][j] = data_copy[i][j].ljust(max_string_length)
+
+        output = json.dumps(data_copy, indent=2)
+        output = output.replace('"', "")
+        output = re.sub(r"\n\s*(?=[^\s\[]|])", " ", output)
+        if is_numeric_data:
+            output = output.replace("_", " ")
+        output = re.sub(r"\]\s*\]", "]\n]", output)
+        return output
+
+
+def array(data):
+    return Array(data)
+
+
+def zeros(shape):
+    if isinstance(shape, int):
+        return Array([0 for _ in range(shape)])
+    elif len(shape) == 1:
+        return Array([0 for _ in range(shape[0])])
+    elif len(shape) == 2:
+        rows, cols = shape
+        return Array([[0 for _ in range(cols)] for _ in range(rows)])
+    else:
+        raise ValueError("Only 1D and 2D arrays are supported.")
+
+
+def ones(shape):
+    if isinstance(shape, int):
+        return Array([1 for _ in range(shape)])
+    elif len(shape) == 1:
+        return Array([1 for _ in range(shape[0])])
+    elif len(shape) == 2:
+        rows, cols = shape
+        return Array([[1 for _ in range(cols)] for _ in range(rows)])
+    else:
+        raise ValueError("Only 1D and 2D arrays are supported.")
+```
+
 ## Prompting ChatGPT to Generate Prompts
 
 _March 2025_
