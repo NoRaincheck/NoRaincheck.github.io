@@ -2,6 +2,63 @@
 
 # 2025
 
+## My Custom Iosevka Font
+
+_May 2025_
+
+I've started using my own custom [Iosevka font](https://github.com/NoRaincheck/Iosevka-Curly). Many of the customisations are there to allow for greater legibility; not necessarily there to improve aesthetics or to improve screen estate. Of note, the things I focussed on are:
+
+- the inclusion of `old-style` numerals, where numerals have varying height. This helps distinguish between numbers and letters much easier
+- changing the default width. This relaxes the 'look' slightly
+- adding tails, and/or curvature to the appropriate letters. This is more a preference item to distinguish and provide the characters a 'softer' look
+
+The full config as of writing is shown below:
+
+```toml
+[buildPlans.IosevkaCurly]
+family = "Iosevka Curly"
+spacing = "normal"
+serifs = "sans"
+noCvSs = true
+exportGlyphNames = false
+digit-form = 'old-style'
+
+  [buildPlans.IosevkaCurly.variants]
+  inherits = "ss20"
+
+    [buildPlans.IosevkaCurly.variants.design]
+    digit-form = "old-style"
+    capital-a = "straight-serifless"
+    capital-q = "crossing-curly-tailed"
+    e = "rounded"
+    f = "serifless"
+    i = "serifed-semi-tailed"
+    l = "serifed-semi-tailed"
+    y = "cursive-serifless"
+
+[buildPlans.IosevkaCurly.weights.Regular]
+shape = 400
+menu = 400
+css = 400
+
+[buildPlans.IosevkaCurly.widths.Normal]
+shape = 600
+menu = 5
+css = "normal"
+
+[buildPlans.IosevkaCurly.slopes.Upright]
+angle = 0
+shape = "upright"
+menu = "upright"
+css = "normal"
+
+[buildPlans.IosevkaCurly.slopes.Italic]
+angle = 9.4
+shape = "italic"
+menu = "italic"
+css = "italic"
+```
+
 ## Maintaining Scripts using Just and Gum
 
 _April 2025_
