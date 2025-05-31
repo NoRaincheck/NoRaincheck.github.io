@@ -1,3 +1,7 @@
+<div align=center>
+<img width="200" src="./noraincheck.jpg"/>
+</div>
+
 **Welcome to my blog**
 
 A collection of thoughts - short essays, reflections, personal opinions  
