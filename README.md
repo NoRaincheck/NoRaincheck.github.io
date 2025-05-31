@@ -1,5 +1,5 @@
 <div align=center>
-<img width="200" src="./noraincheck_notext-modified-min.png"/>
+<img width="200" src="./noraincheck_profile.png"/>
 </div>
 
 **Welcome to my blog**
