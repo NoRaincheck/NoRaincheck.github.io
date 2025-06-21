@@ -4,6 +4,142 @@ A collection of experiments, code dump etc, that are more for the vibe than for 
 
 # 2025
 
+## Using Local LLMs as an Arbiter/Classifier
+
+Using LLMs for doing arbitration or classification is nothing new. Generally I found that "smaller" local LLMs struggled or led to overly optimistic results. I think 'smaller' models are finally performant enough (to some extent at least) where coming up with binary outcomes in a structured manner is "good enough". In general as of writing things still aren't good enough. This is reflected in things like the [Goose Blogpost](https://block.github.io/goose/blog/2025/03/14/goose-ollama/) where 32gb of RAM is still generally recommended. Here, I use the very good `gemma-3-12b` model to accomplish this -- I generally found models smaller/older than this failed to properly perform structured outputs in a meaningful manner. 
+
+The below example is based on [Tricube Tales](https://www.drivethrurpg.com/en/product/294202/tricube-tales) which is a TTRPG released under CC BY 3.0 license. 
+
+```py
+import os
+from pathlib import Path
+from pprint import pprint
+from typing import Literal
+
+from llama_cpp import Llama
+from llama_cpp.llama_tokenizer import LlamaHFTokenizer
+from pydantic import BaseModel, model_validator
+
+model_id = str(
+    (
+        Path(os.environ.get("HOME", "~")) / "dev/google_gemma-3-12b-it-qat-Q4_0.gguf"
+    ).absolute()
+)
+
+prompt = """
+You are "The Arbiter", an impartial rules adjudicator for the RPG Tricube Tales.
+Your sole job is to determine which dice modifiers apply to a proposed action. Do not narrate outcomes or roll dice.
+
+Your judgments follow this logic:
+
+- Award +1 die if the action clearly aligns with the character's trait.
+  - The action must directly reflect the strengths of that trait:  
+    - Brawny: feats of strength, endurance, or physical toughness
+    - Agile: speed, balance, dexterity, or evasive finesse
+    - Crafty: cleverness, deception, planning, or technical skill
+
+- Apply -1 die if the character's quirk meaningfully impedes the action.
+- Apply -1 die if the action is inherently challenging for most people in the setting, or the character lacks relevant expertise for the task
+
+These modifiers are cumulative. The resulting diceModifier may be: +1, 0, -1, or -2.
+
+Return your judgment using the following strict JSON schema:
+
+```json
+{
+  "trait_bonus":   true | false,
+  "quirk_penalty": true | false,
+  "difficult":     true | false,
+  "rationale":     "concise human-readable explanation (30-70 words)"
+}
+"""
+
+
+class Arbiter(BaseModel):
+    trait_bonus: bool
+    quirk_penalty: bool
+    difficult: bool
+    rationale: str
+
+
+class DiceModifierArbiter(Arbiter):
+    dice_modifier: int | None = None
+
+    @model_validator(mode="after")
+    def validate_dice_modifier(self):
+        modifier = 0
+        if self.trait_bonus:
+            modifier += 1
+        if self.quirk_penalty:
+            modifier -= 1
+        if self.difficult:
+            modifier -= 1
+        self.dice_modifier = modifier
+        return self
+
+
+def create_chat_completion_with_schema(
+    messages: list[dict], model: Llama, schema: type[BaseModel], **kwargs
+) -> type[BaseModel]:
+    output = model.create_chat_completion(
+        messages=messages,
+        response_format={
+            "type": "json_object",
+            "schema": schema.model_json_schema(),
+        },
+        **kwargs,
+    )
+    return schema.model_validate_json(output["choices"][0]["message"]["content"])
+
+
+def determine_dice_modifier(context: str) -> DiceModifierArbiter:
+    llama_model = Llama(
+        model_path=model_id,
+        tokenizer=LlamaHFTokenizer.from_pretrained("gemma-3-12b"),
+        n_ctx=2048,
+    )
+    result = create_chat_completion_with_schema(
+        [
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": context},
+        ],
+        llama_model,
+        Arbiter,
+    )  # type: ignore
+    return DiceModifierArbiter.model_validate(result.model_dump())
+
+
+if __name__ == "__main__":
+    result = []
+    result.append(
+        determine_dice_modifier("A brawny barbarian swings his sword at a goblin.")
+    )
+    result.append(
+        determine_dice_modifier("A brawny barbarian draws his bow at a goblin.")
+    )
+    result.append(
+        determine_dice_modifier("A brawny barbarian attempts to bargin with a vendor")
+    )
+    result.append(
+        determine_dice_modifier(
+            "Would a greedy, agile, thief successfully flee from a situation or get distracted with a treasure chest?"
+        )
+    )
+    pprint(result)
+```
+
+Output:
+
+```py
+ DiceModifierArbiter(trait_bonus=True, quirk_penalty=False, difficult=False, rationale="Swinging a sword is a direct application of brawny strength. There's no indication of a quirk impeding the action, and while combat is challenging, it's not inherently difficult for most warriors.", dice_modifier=1),
+
+ DiceModifierArbiter(trait_bonus=False, quirk_penalty=False, difficult=False, rationale="Drawing a bow is not inherently a feat of strength, endurance, or toughness. While barbarians might be proficient, it doesn't automatically grant a bonus. There's no indication of a quirk impeding the action, and drawing a bow isn't exceptionally difficult.", dice_modifier=0),
+
+ DiceModifierArbiter(trait_bonus=False, quirk_penalty=False, difficult=True, rationale="While a barbarian might have some persuasive ability, bargaining is not a direct application of Brawny. It is also inherently difficult for most people, requiring social finesse and negotiation skills, which are not typically a barbarian's forte.", dice_modifier=-1),
+
+ DiceModifierArbiter(trait_bonus=True, quirk_penalty=True, difficult=True, rationale="The thief's agility grants a bonus for fleeing. However, their greed introduces a penalty as they'd be tempted to grab treasure, hindering their escape. Fleeing a dangerous situation is generally difficult, warranting a further penalty.", dice_modifier=-1)
+```
+
 ## stdlib Numpy for when you don't need all of Numpy
 
 _May 2025_
