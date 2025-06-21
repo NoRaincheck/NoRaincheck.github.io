@@ -131,13 +131,25 @@ if __name__ == "__main__":
 Output:
 
 ```py
- DiceModifierArbiter(trait_bonus=True, quirk_penalty=False, difficult=False, rationale="Swinging a sword is a direct application of brawny strength. There's no indication of a quirk impeding the action, and while combat is challenging, it's not inherently difficult for most warriors.", dice_modifier=1),
+ DiceModifierArbiter(trait_bonus=True, quirk_penalty=False, difficult=False, rationale="Swinging a sword is a direct application of brawny strength. There's no indication of a quirk impeding the action, and while combat is challenging, it's not inherently difficult for most warriors.", dice_modifier=1)
 
- DiceModifierArbiter(trait_bonus=False, quirk_penalty=False, difficult=False, rationale="Drawing a bow is not inherently a feat of strength, endurance, or toughness. While barbarians might be proficient, it doesn't automatically grant a bonus. There's no indication of a quirk impeding the action, and drawing a bow isn't exceptionally difficult.", dice_modifier=0),
+ DiceModifierArbiter(trait_bonus=False, quirk_penalty=False, difficult=False, rationale="Drawing a bow is not inherently a feat of strength, endurance, or toughness. While barbarians might be proficient, it doesn't automatically grant a bonus. There's no indication of a quirk impeding the action, and drawing a bow isn't exceptionally difficult.", dice_modifier=0)
 
- DiceModifierArbiter(trait_bonus=False, quirk_penalty=False, difficult=True, rationale="While a barbarian might have some persuasive ability, bargaining is not a direct application of Brawny. It is also inherently difficult for most people, requiring social finesse and negotiation skills, which are not typically a barbarian's forte.", dice_modifier=-1),
+ DiceModifierArbiter(trait_bonus=False, quirk_penalty=False, difficult=True, rationale="While a barbarian might have some persuasive ability, bargaining is not a direct application of Brawny. It is also inherently difficult for most people, requiring social finesse and negotiation skills, which are not typically a barbarian's forte.", dice_modifier=-1)
 
  DiceModifierArbiter(trait_bonus=True, quirk_penalty=True, difficult=True, rationale="The thief's agility grants a bonus for fleeing. However, their greed introduces a penalty as they'd be tempted to grab treasure, hindering their escape. Fleeing a dangerous situation is generally difficult, warranting a further penalty.", dice_modifier=-1)
+```
+
+Using `Qwen3-8B` model also works relative well with this output:
+
+```py
+ DiceModifierArbiter(trait_bonus=True, quirk_penalty=False, difficult=False, rationale='Swinging a sword is a strength-based action, aligning with Brawny. No quirk or difficulty mentioned.', dice_modifier=1)
+
+ DiceModifierArbiter(trait_bonus=False, quirk_penalty=False, difficult=False, rationale='Drawing a bow is not a strength-based action. Brawny traits relate to melee, not ranged combat.', dice_modifier=0)
+
+ DiceModifierArbiter(trait_bonus=False, quirk_penalty=False, difficult=True, rationale='Brawny characters are physically strong but not necessarily skilled in negotiation. Bargaining is an inherently difficult task without relevant expertise.', dice_modifier=-1)
+
+ DiceModifierArbiter(trait_bonus=False, quirk_penalty=True, difficult=False, rationale="The thief's greed (quirk) would likely distract them from fleeing, outweighing their agility.", dice_modifier=-1)]
 ```
 
 ## stdlib Numpy for when you don't need all of Numpy
