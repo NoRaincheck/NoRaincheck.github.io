@@ -4,6 +4,10 @@ Here are things that I didn't invent, but I find myself constantly referring bac
 
 ---
 
+### A 'local' `.gitignore`
+
+Sometimes you want to ignore files and not push them to VSC but also don't want `git` to even possibly consider it. To do this, you can update `.git/info/exclude`
+
 ### `uv` Script Mode
 
 See [here](https://docs.astral.sh/uv/guides/scripts/#creating-a-python-script)
