@@ -123,6 +123,7 @@ gpg --decrypt foo.gpg | pbcopy
 ## Misc
 
 [stats](https://formulae.brew.sh/cask/stats), because why not?  
-[insomnia](https://github.com/Kong/insomnia), postman, but self-hosted  
+[Insomnia](https://github.com/Kong/insomnia), postman, but self-hosted  
 [KeePass](https://en.wikipedia.org/wiki/KeePass), self-hosted password manager  
-[obsidian](https://obsidian.md/) for taking notes  
+[Obsidian](https://obsidian.md/) for taking notes, with [Harper LSP Plugin](https://writewithharper.com/docs/integrations/obsidian)
+
