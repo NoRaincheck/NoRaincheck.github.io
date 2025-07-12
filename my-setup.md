@@ -10,17 +10,28 @@ For my shell:
 
 ## Themes
 
-[Dracula](https://draculatheme.com/), good defaults, consistent experience. Alternatives I've considered are [Catppuccin](https://catppuccin.com/) which I actually really, really like, and [Rosé Pine](https://rosepinetheme.com/) which I've briefly toyed with, but haven't taken seriously. 
+[Catppuccin](https://catppuccin.com/) has started to replace [Dracula](https://draculatheme.com/) as my daily driver, though I still use some [Dracula](https://draculatheme.com/) themes like the terminal which I believe to be superior option still. Alternatives I've considered are [Rosé Pine](https://rosepinetheme.com/) which I've briefly toyed with, but haven't taken seriously. 
 
 ## Text Completion via LLMs
 
-[llama-vscode](https://marketplace.visualstudio.com/items?itemName=ggml-org.llama-vscode) with [llama.cpp](https://marketplace.visualstudio.com/items?itemName=ggml-org.llama-vscode). It's proven to be good enough and gets out of the way (plus I can self-host this). The medium size variant `ggml-org/Qwen2.5-Coder-3B-Q8_0-GGUF` is good enough for me
+[llama-vscode](https://marketplace.visualstudio.com/items?itemName=ggml-org.llama-vscode) with [llama.cpp](https://marketplace.visualstudio.com/items?itemName=ggml-org.llama-vscode). It's proven to be good enough and gets out of the way (plus I can self-host this). I've had good success using `Devstral-Small` or even a general LLM like `gemma-3-12b` variants
 
 ```sh
 llama-server \
     -m qwen2.5-coder-3b-q8_0.gguf \
     --port 8012 -ngl 99 -fa -ub 1024 -b 1024 \
     --ctx-size 0 --cache-reuse 256
+```
+
+I've also started using `aider` for `/ask` commands. Though I generally don't use local LLMs for agentic code editing as my daily driver.
+
+```sh
+uvx --from aider-install aider \
+  --model openai/default \
+  --openai-api-base http://127.0.0.1:8080/ --openai-api-key NONE \
+  --map-tokens 1024 \
+  --no-show-model-warnings \
+  --no-gitignore 
 ```
 
 ## VSCode Settings
