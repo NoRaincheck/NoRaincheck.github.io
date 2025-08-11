@@ -127,3 +127,5 @@ gpg --decrypt foo.gpg | pbcopy
 [KeePass](https://en.wikipedia.org/wiki/KeePass), self-hosted password manager  
 [Obsidian](https://obsidian.md/) for taking notes, with [Harper LSP Plugin](https://writewithharper.com/docs/integrations/obsidian)
 
+I've been keeping a 10+ year old computer alive. [Pale Moon](https://www.palemoon.org/) has been amazing for this.
+
