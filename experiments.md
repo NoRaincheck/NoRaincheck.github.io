@@ -4,6 +4,8 @@ A collection of experiments, code dump etc, that are more for the vibe than for 
 
 # 2025
 
+_June 2025_
+
 ## Using Local LLMs as an Arbiter/Classifier
 
 Using LLMs for doing arbitration or classification is nothing new. Generally I found that "smaller" local LLMs struggled or led to overly optimistic results. I think 'smaller' models are finally performant enough (to some extent at least) where coming up with binary outcomes in a structured manner is "good enough". In general as of writing things still aren't good enough. This is reflected in things like the [Goose Blogpost](https://block.github.io/goose/blog/2025/03/14/goose-ollama/) where 32gb of RAM is still generally recommended. Here, I use the very good `gemma-3-12b` model to accomplish this -- I generally found models smaller/older than this failed to properly perform structured outputs in a meaningful manner. 
