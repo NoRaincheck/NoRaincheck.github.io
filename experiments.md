@@ -4,9 +4,436 @@ A collection of experiments, code dump etc, that are more for the vibe than for 
 
 # 2025
 
-_June 2025_
+## Tree Ensemble Hashing
+
+_August 2025_
+
+I've been thinking about how to encode decision trees (on and off). This is a vibe-coded approach that tries to encode the path of every instance based on what leaf of the decision tree(s) the instance lands on. The rough idea is that it also gets 'weight' from every parent node (weighted based on distance to leaf) and is encoded by feature hashing, which allows it to be aggregated by all trees. It somewhat works. I think this kind of approach may be useful for scenarios where online learning with just a linear head is used, especially when feature engineering (from the trees) is done in an online manner, for example via Mondrian Trees.
+
+```py
+import mmh3
+import numpy as np
+from typing import Dict, List, Tuple, Optional, Union, Any
+from onnx import ModelProto
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class TreeEnsembleHash:
+    """
+    Implements the tree ensemble hashing algorithm described in the README.
+    
+    The algorithm works as follows:
+    1. Extract all nodes, splits (thresholds), and paths from an ONNX tree ensemble model
+    2. For each input sample, traverse the trees to find which leaves are visited
+    3. Hash only the visited leaves based on {node_id} {operation} {threshold}
+    4. Compute weights based on inverse distance to leaf nodes using 1/d(x,y)^p, 0<p<1
+    5. Aggregate all hashed leaf features to create the final representation
+    """
+    
+    def __init__(self, onnx_model: Union[ModelProto, Tuple[ModelProto, Any]], hash_dim: int = 128, distance_power: float = 0.5):
+        """
+        Initialize the TreeEnsembleHash with an ONNX model.
+        
+        Args:
+            onnx_model: ONNX model containing tree ensemble operators, or tuple (ModelProto, Topology)
+            hash_dim: Dimension for murmurhash3 output
+            distance_power: Power parameter for distance weighting (0 < p < 1)
+        """
+        if not 0 < distance_power < 1:
+            raise ValueError("distance_power must be between 0 and 1")
+        if hash_dim <= 0:
+            raise ValueError("hash_dim must be positive")
+            
+        self.hash_dim = hash_dim
+        self.distance_power = distance_power
+        
+        # Extract and store tree ensemble information
+        self.tree_ensembles = self._extract_tree_ensemble_info(onnx_model)
+        if not self.tree_ensembles:
+            raise ValueError("No tree ensemble operators found in the model")
+            
+        # Pre-compute distances for all trees
+        self.tree_distances = []
+        for tree_info in self.tree_ensembles:
+            distances = self._compute_node_distances(tree_info)
+            self.tree_distances.append(distances)
+        
+    def _extract_tree_ensemble_info(self, model: Union[ModelProto, Tuple[ModelProto, Any]]) -> List[Dict]:
+        """
+        Extract tree ensemble information from ONNX model.
+        
+        Args:
+            model: ONNX model containing tree ensemble operators, or tuple (ModelProto, Topology)
+            
+        Returns:
+            List of dictionaries containing tree ensemble information
+        """
+        # Handle case where convert_sklearn returns (ModelProto, Topology)
+        if isinstance(model, tuple):
+            model = model[0]
+        
+        tree_ensembles = []
+        
+        for node in model.graph.node:
+            # Check both the op_type and domain for tree ensemble operators
+            if (node.op_type in ['TreeEnsembleClassifier', 'TreeEnsembleRegressor'] or
+                (hasattr(node, 'domain') and node.domain == 'ai.onnx.ml' and 
+                 node.op_type in ['TreeEnsembleClassifier', 'TreeEnsembleRegressor'])):
+                # Extract attributes
+                attrs = {attr.name: attr for attr in node.attribute}
+                
+                # Get node information
+                node_ids = self._get_attribute_values(attrs, 'nodes_nodeids')
+                feature_ids = self._get_attribute_values(attrs, 'nodes_featureids')
+                values = self._get_attribute_values(attrs, 'nodes_values')
+                modes = self._get_attribute_values(attrs, 'nodes_modes')
+                true_node_ids = self._get_attribute_values(attrs, 'nodes_truenodeids')
+                false_node_ids = self._get_attribute_values(attrs, 'nodes_falsenodeids')
+                tree_ids = self._get_attribute_values(attrs, 'nodes_treeids')
+                
+                if all(v is not None for v in [node_ids, feature_ids, values, modes, true_node_ids, false_node_ids, tree_ids]):
+                    tree_ensembles.append({
+                        'node_ids': node_ids,
+                        'feature_ids': feature_ids,
+                        'values': values,
+                        'modes': modes,
+                        'true_node_ids': true_node_ids,
+                        'false_node_ids': false_node_ids,
+                        'tree_ids': tree_ids
+                    })
+                    
+        return tree_ensembles
+    
+    def _get_attribute_values(self, attrs: Dict, name: str) -> Optional[List]:
+        """Extract attribute values from ONNX node attributes."""
+        if name not in attrs:
+            logger.debug(f"Attribute {name} not found in {list(attrs.keys())}")
+            return None
+            
+        attr = attrs[name]
+        logger.debug(f"Attribute {name} type: {attr.type}")
+        
+        try:
+            if attr.type == 1:  # FLOAT
+                result = list(attr.floats)
+                return result
+            elif attr.type == 2:  # INT
+                result = list(attr.ints)
+                return result
+            elif attr.type == 3:  # STRING
+                result = list(attr.strings)
+                return result
+            elif attr.type == 6:  # FLOATS (alternative representation)
+                result = list(attr.floats)
+                return result
+            elif attr.type == 7:  # INTS (alternative representation)
+                result = list(attr.ints)
+                return result
+            elif attr.type == 8:  # STRINGS (alternative representation)
+                result = list(attr.strings)
+                return result
+            else:
+                return None
+        except Exception as e:
+            return None
+    
+    def _compute_node_distances(self, tree_info: Dict) -> Dict[int, Union[int, float]]:
+        """
+        Compute the distance from each node to its nearest leaf node.
+        
+        Args:
+            tree_info: Dictionary containing tree structure information
+            
+        Returns:
+            Dictionary mapping node_id to distance to nearest leaf
+        """
+        node_ids = tree_info['node_ids']
+        modes = tree_info['modes']
+        true_node_ids = tree_info['true_node_ids']
+        false_node_ids = tree_info['false_node_ids']
+        
+        # Create adjacency list
+        adjacency = {}
+        for i, node_id in enumerate(node_ids):
+            if modes[i] != b'LEAF' and modes[i] != 'LEAF':
+                adjacency[node_id] = []
+                if true_node_ids[i] != 0:
+                    adjacency[node_id].append(true_node_ids[i])
+                if false_node_ids[i] != 0:
+                    adjacency[node_id].append(false_node_ids[i])
+        
+        # BFS to compute distances from each node to nearest leaf
+        distances = {}
+        for node_id in node_ids:
+            if node_id not in distances:
+                distances[node_id] = self._bfs_distance_to_leaf(node_id, adjacency, modes, node_ids)
+                
+        return distances
+    
+    def _bfs_distance_to_leaf(self, start_node: int, adjacency: Dict, modes: List, node_ids: List) -> Union[int, float]:
+        """Compute distance from start_node to nearest leaf using BFS."""
+        if start_node not in adjacency:
+            return 0  # This is a leaf node
+            
+        visited = set()
+        queue = [(start_node, 0)]
+        
+        while queue:
+            current_node, distance = queue.pop(0)
+            
+            if current_node in visited:
+                continue
+                
+            visited.add(current_node)
+            
+            # Find the index of current_node in node_ids
+            try:
+                idx = node_ids.index(current_node)
+                if modes[idx] == b'LEAF' or modes[idx] == 'LEAF':
+                    return distance
+            except ValueError:
+                continue
+                
+            # Add neighbors to queue
+            if current_node in adjacency:
+                for neighbor in adjacency[current_node]:
+                    if neighbor != 0:  # 0 indicates no child
+                        queue.append((neighbor, distance + 1))
+                        
+        return float('inf')  # No path to leaf found
+    
+    def _traverse_tree(self, X: np.ndarray, tree_info: Dict, tree_idx: int) -> List[Tuple[int, str, float]]:
+        """
+        Traverse a single tree based on input data to find all visited nodes along the path.
+        
+        Args:
+            X: Input data (single sample)
+            tree_info: Dictionary containing tree information
+            tree_idx: Index of the tree in the ensemble
+            
+        Returns:
+            List of tuples (node_id, operation, threshold) for all nodes along the path
+        """
+        node_ids = tree_info['node_ids']
+        feature_ids = tree_info['feature_ids']
+        values = tree_info['values']
+        modes = tree_info['modes']
+        true_node_ids = tree_info['true_node_ids']
+        false_node_ids = tree_info['false_node_ids']
+        tree_ids = tree_info['tree_ids']
+        
+        # Find nodes belonging to this specific tree
+        tree_mask = [i for i, tid in enumerate(tree_ids) if tid == tree_idx]
+        
+        if not tree_mask:
+            return []
+        
+        # Create a mapping from node_id to index for this tree
+        node_to_idx = {node_ids[i]: i for i in tree_mask}
+        
+        # Find the root node - it should be the one that's not referenced as a child
+        all_child_nodes = set()
+        for i in tree_mask:
+            if true_node_ids[i] != 0:
+                all_child_nodes.add(true_node_ids[i])
+            if false_node_ids[i] != 0:
+                all_child_nodes.add(false_node_ids[i])
+        
+        # Root node is the one that's not a child of any other node
+        root_candidates = [node_ids[i] for i in tree_mask if node_ids[i] not in all_child_nodes]
+        
+        if not root_candidates:
+            # Fallback: use first node in tree
+            root_node_id = node_ids[tree_mask[0]]
+        else:
+            root_node_id = root_candidates[0]
+        
+        current_node_id = root_node_id
+        visited_nodes = []
+        
+        while True:
+            if current_node_id not in node_to_idx:
+                break
+                
+            idx = node_to_idx[current_node_id]
+            mode = modes[idx]
+            feature_id = feature_ids[idx] if feature_ids else 0
+            value = values[idx] if values else 0.0
+            
+            # Add this node to visited nodes (including its operation and threshold)
+            visited_nodes.append((current_node_id, mode, value))
+            
+            # If we've reached a leaf, stop traversing
+            if mode == b'LEAF' or mode == 'LEAF':
+                break
+            
+            # If it's a branch node, traverse based on feature value
+            if mode == b'BRANCH_LEQ' or mode == 'BRANCH_LEQ':
+                # Get the feature value for this sample
+                if feature_id < X.shape[0]:
+                    feature_value = X[feature_id]
+                    
+                    # Decide which path to take
+                    if feature_value <= value:
+                        next_node_id = true_node_ids[idx]
+                    else:
+                        next_node_id = false_node_ids[idx]
+                    
+                    # Move to next node
+                    if next_node_id != 0:  # 0 indicates no child
+                        current_node_id = next_node_id
+                    else:
+                        break
+                else:
+                    # Feature ID out of bounds, stop
+                    break
+            else:
+                # Unknown mode, stop
+                break
+        
+        return visited_nodes
+    
+    def _hash_node(self, node_id: int, operation: str, threshold: float) -> int:
+        """
+        Hash a node using murmurhash3 based on {node_id} {operation} {threshold}.
+        
+        Args:
+            node_id: Node identifier
+            operation: Operation type (BRANCH_LEQ, LEAF, etc.)
+            threshold: Threshold value for the split
+            
+        Returns:
+            Hash value
+        """
+        node_string = f"{node_id} {operation} {threshold}"
+        return mmh3.hash(node_string)
+    
+    def _compute_node_weight(self, distance: Union[int, float]) -> float:
+        """
+        Compute weight based on inverse distance to leaf node.
+        
+        Args:
+            distance: Distance to leaf node
+            
+        Returns:
+            Weight value using 1/d(x,y)^p formula
+        """
+        if distance == 0:
+            return 1.0
+        if distance == float('inf'):
+            return 0.0  # Infinite distance gets zero weight
+        return 1.0 / (distance ** self.distance_power)
+    
+    def _create_hash_vector_from_nodes(self, visited_nodes: List[Tuple[int, str, float]], tree_info: Dict, distances: Dict[int, Union[int, float]]) -> np.ndarray:
+        """
+        Create hash vector from all visited nodes along the path.
+        
+        Args:
+            visited_nodes: List of tuples (node_id, operation, threshold) for visited nodes
+            tree_info: Dictionary containing tree information
+            distances: Dictionary mapping node_id to distance to leaf
+            
+        Returns:
+            Hash vector of dimension hash_dim
+        """
+        hash_vector = np.zeros(self.hash_dim)
+        
+        for node_id, operation, threshold in visited_nodes:
+            # Hash the node using its ID, operation, and threshold
+            node_hash = self._hash_node(node_id, operation, threshold)
+            
+            # Compute weight based on distance to leaf
+            distance = distances.get(node_id, 0)
+            weight = self._compute_node_weight(distance)
+            
+            # Add weighted hash to vector
+            hash_idx = abs(node_hash) % self.hash_dim
+            hash_vector[hash_idx] += weight
+            
+        return hash_vector
+    
+    def transform(self, X: np.ndarray) -> np.ndarray:
+        """
+        Transform input data to hash vector representation by traversing trees.
+        
+        Args:
+            X: Input data matrix of shape (n_samples, n_features)
+            
+        Returns:
+            Hash vector representation of shape (n_samples, hash_dim)
+        """
+        if X.ndim == 1:
+            X = X.reshape(1, -1)
+            
+        n_samples = X.shape[0]
+        result = np.zeros((n_samples, self.hash_dim))
+        
+        for sample_idx in range(n_samples):
+            sample = X[sample_idx]
+            
+            # Aggregate hash vectors from all trees
+            sample_vector = np.zeros(self.hash_dim)
+            
+            for tree_idx, tree_info in enumerate(self.tree_ensembles):
+                # Find unique tree IDs in this tree ensemble
+                unique_tree_ids = list(set(tree_info['tree_ids']))
+                
+                for tree_id in unique_tree_ids:
+                    # Traverse this specific tree to find visited nodes along the path
+                    visited_nodes = self._traverse_tree(sample, tree_info, tree_id)
+                    
+                    # Create hash vector from visited nodes
+                    tree_vector = self._create_hash_vector_from_nodes(
+                        visited_nodes, tree_info, self.tree_distances[tree_idx]
+                    )
+                    
+                    # Add to sample vector
+                    sample_vector += tree_vector
+            
+            result[sample_idx] = sample_vector
+            
+        return result
+    
+    def fit_transform(self, X: np.ndarray) -> np.ndarray:
+        """
+        Alias for transform method to maintain sklearn-like interface.
+        
+        Args:
+            X: Input data matrix
+            
+        Returns:
+            Hash vector representation
+        """
+        return self.transform(X)
+
+
+def create_tree_ensemble_hash(
+    onnx_model: Union[ModelProto, Tuple[ModelProto, Any]],
+    X: np.ndarray,
+    hash_dim: int = 128,
+    distance_power: float = 0.5
+) -> np.ndarray:
+    """
+    Convenience function to create tree ensemble hash vector.
+    
+    Args:
+        onnx_model: ONNX model containing tree ensemble operators
+        X: Input data matrix
+        hash_dim: Dimension for murmurhash3 output
+        distance_power: Power parameter for distance weighting (0 < p < 1)
+        
+    Returns:
+        Hash vector representation of the tree ensemble
+    """
+    hasher = TreeEnsembleHash(onnx_model, hash_dim=hash_dim, distance_power=distance_power)
+    return hasher.transform(X)
+```
 
 ## Using Local LLMs as an Arbiter/Classifier
+
+_June 2025_
 
 Using LLMs for doing arbitration or classification is nothing new. Generally I found that "smaller" local LLMs struggled or led to overly optimistic results. I think 'smaller' models are finally performant enough (to some extent at least) where coming up with binary outcomes in a structured manner is "good enough". In general as of writing things still aren't good enough. This is reflected in things like the [Goose Blogpost](https://block.github.io/goose/blog/2025/03/14/goose-ollama/) where 32gb of RAM is still generally recommended. Here, I use the very good `gemma-3-12b` model to accomplish this -- I generally found models smaller/older than this failed to properly perform structured outputs in a meaningful manner. 
 
