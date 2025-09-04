@@ -1,6 +1,6 @@
 # In Progress
 
-[nvim](_tutorial/nvim.md ':include:')
+[nvim](_tutorial/nvim.md ':include')
 
 # Ideas
 
