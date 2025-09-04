@@ -1,3 +1,9 @@
+# In Progress
+
+[nvim](_tutorial/nvim.md ':include:')
+
+# Ideas
+
 * Write janky games (under NoRI - No Raincheck Interactive), using https://github.com/hajimehoshi/ebiten with extensions https://github.com/SolarLune/Tetra3d
   *  For sprite-based games consider this tileset: https://0x72.itch.io/dungeontileset-ii
   *  We can try [DALL-E 3 to TRELLIS](https://trellis3d.github.io/) pipeline with [Mixamo](https://www.mixamo.com/) for Animations with Blender to generate the spritesheets.
