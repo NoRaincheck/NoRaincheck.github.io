@@ -40,15 +40,16 @@ I generally like to leave things to default, since moving to other people's comp
 
 ```json
 [
-    {
-        "key": "ctrl+`",
-        "command": "workbench.action.terminal.focus"
-    },
-    {
-        "key": "ctrl+`",
-        "command": "workbench.action.focusActiveEditorGroup",
-        "when": "terminalFocus"
-    }
+  "files.exclude": { "**/.git": false },
+  "workbench.colorTheme": "Catppuccin Macchiato",
+  "editor.fontFamily": "'Iosevka Curly', Menlo, monospace",
+  "go.inlayHints.assignVariableTypes": true,
+  "go.inlayHints.compositeLiteralFields": true,
+  "go.inlayHints.compositeLiteralTypes": true,
+  "go.inlayHints.constantValues": true,
+  "go.inlayHints.functionTypeParameters": true,
+  "go.inlayHints.parameterNames": true,
+  "rust-analyzer.cargo.features": ["all"]
 ]
 ```
 
