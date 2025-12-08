@@ -2,6 +2,8 @@
 
 # 2025
 
+[202512](/_blog/202512.md ':include')
+
 [202511](/_blog/202511.md ':include')
 
 [202510](_blog/202510.md ':include')
