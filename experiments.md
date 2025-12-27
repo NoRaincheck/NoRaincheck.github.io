@@ -4,6 +4,731 @@ A collection of experiments, code dump etc, that are more for the vibe than for 
 
 # 2025
 
+## Lightweight SHAP Implementation
+
+_December 2025_
+
+When performing SHAP, sometimes the requirements to install are overly onerous. This is a lightweight implementation of Permutation SHAP including helper functions matching the style of `scikit-learn` interface.
+
+```py
+"""
+Permutation SHAP with scikit-learn style API.
+
+This module provides permutation-based SHAP feature importance computation
+following scikit-learn's API conventions, with feature selection utilities
+including Boruta.
+
+Example usage:
+
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> from sklearn.datasets import make_classification
+    >>> X, y = make_classification(n_samples=100, n_features=10, random_state=42)
+    >>> model = RandomForestClassifier(random_state=42).fit(X, y)
+    
+    # Global importance (sklearn permutation_importance style)
+    >>> result = permutation_shap(model, X, n_repeats=5, random_state=42)
+    >>> print(result.importances_mean)
+    
+    # Per-instance SHAP values
+    >>> shap_values = permutation_shap_values(model, X[:5], background=X, random_state=42)
+    >>> print(shap_values.shape)  # (5, 10) or (5, 10, n_classes)
+    
+    # Feature selection
+    >>> selector = SelectFromShap(model, threshold='median', random_state=42)
+    >>> X_selected = selector.fit_transform(X)
+"""
+
+import numpy as np
+from sklearn.base import BaseEstimator, clone, is_classifier
+from sklearn.feature_selection import SelectorMixin
+from sklearn.utils import Bunch, check_random_state
+from sklearn.cluster import KMeans, MiniBatchKMeans
+
+
+def _get_predict_fn(estimator):
+    """
+    Get a prediction function from an estimator.
+    
+    For classifiers, uses predict_proba if available, otherwise predict.
+    For regressors, uses predict.
+    
+    Parameters
+    ----------
+    estimator : estimator object
+        A fitted estimator.
+        
+    Returns
+    -------
+    predict_fn : callable
+        Function that takes X and returns predictions.
+    """
+    if hasattr(estimator, 'predict_proba'):
+        return estimator.predict_proba
+    return estimator.predict
+
+
+def _summarize_data(X, max_samples, random_state):
+    """
+    Summarize data using k-means clustering if max_samples is specified.
+    
+    Parameters
+    ----------
+    X : np.ndarray
+        Input data to summarize. Shape: (n_samples, n_features)
+    max_samples : int, float, or None
+        If None, return X unchanged.
+        If int, reduce to that many centroids via k-means.
+        If float (0-1), reduce to that fraction of samples.
+    random_state : RandomState
+        Random state for k-means.
+        
+    Returns
+    -------
+    np.ndarray
+        Either the original X or k-means cluster centroids.
+    """
+    if max_samples is None:
+        return X
+    
+    # Determine number of clusters
+    if isinstance(max_samples, float):
+        if not 0 < max_samples <= 1:
+            raise ValueError("max_samples as float must be in (0, 1]")
+        n_clusters = max(1, int(max_samples * X.shape[0]))
+    else:
+        n_clusters = int(max_samples)
+    
+    # No reduction needed if n_clusters >= n_samples
+    if n_clusters >= X.shape[0]:
+        return X
+    
+    if n_clusters < 1:
+        raise ValueError("max_samples must result in at least 1 cluster")
+    
+    # Use MiniBatchKMeans for large datasets (faster), KMeans otherwise (more accurate)
+    threshold = 10000
+    KMeansClass = MiniBatchKMeans if X.shape[0] > threshold else KMeans
+    seed = random_state.randint(0, 2**31) if hasattr(random_state, 'randint') else random_state
+    kmeans = KMeansClass(n_clusters=n_clusters, random_state=seed, n_init='auto')
+    kmeans.fit(X)
+    return kmeans.cluster_centers_
+
+
+def _compute_shap_single_instance(x, predict_fn, background, n_permutations, rng):
+    """
+    Compute SHAP values for a single instance using permutation method
+    with antithetic sampling.
+    
+    Parameters
+    ----------
+    x : np.ndarray
+        Instance to explain. Shape: (n_features,)
+    predict_fn : callable
+        Prediction function.
+    background : np.ndarray
+        Background data. Shape: (n_background, n_features)
+    n_permutations : int
+        Number of permutations to sample.
+    rng : RandomState
+        Random number generator.
+        
+    Returns
+    -------
+    shap_values : np.ndarray
+        SHAP values for each feature.
+    """
+    n_features = x.shape[0]
+    n_background = background.shape[0]
+    
+    # Determine output dimensionality
+    sample_pred = predict_fn(background[:1])
+    if sample_pred.ndim == 1:
+        n_outputs = 1
+        contributions = [[] for _ in range(n_features)]
+    else:
+        n_outputs = sample_pred.shape[1]
+        contributions = [[] for _ in range(n_features)]
+    
+    for _ in range(n_permutations):
+        # Sample a random permutation of feature indices
+        perm = rng.permutation(n_features)
+        
+        # Sample a background instance for absent features
+        bg_idx = rng.randint(n_background)
+        bg_sample = background[bg_idx].copy()
+        
+        # Forward pass: add features according to permutation
+        _compute_marginal_contributions(x, perm, bg_sample, predict_fn, contributions)
+        
+        # Backward pass (antithetic): use reverse permutation to reduce variance
+        reverse_perm = perm[::-1]
+        _compute_marginal_contributions(x, reverse_perm, bg_sample, predict_fn, contributions)
+    
+    # Average all marginal contributions for each feature
+    if n_outputs == 1:
+        shap_values = np.array([np.mean(contribs) for contribs in contributions])
+    else:
+        shap_values = np.array([
+            np.mean(contribs, axis=0) for contribs in contributions
+        ])
+    
+    return shap_values
+
+
+def _compute_marginal_contributions(x, permutation, background_sample, predict_fn, 
+                                    contributions):
+    """
+    Compute marginal contributions for a single permutation pass.
+    
+    Starting from a coalition containing no features from x (all from background),
+    we add features one at a time according to the permutation order.
+    Each addition gives us a marginal contribution for that feature.
+    
+    Parameters
+    ----------
+    x : np.ndarray
+        Instance to explain. Shape: (n_features,)
+    permutation : np.ndarray
+        Order in which to add features. Shape: (n_features,)
+    background_sample : np.ndarray
+        Background sample for absent features. Shape: (n_features,)
+    predict_fn : callable
+        Prediction function.
+    contributions : list of lists
+        Contribution accumulator. contributions[i] is a list of marginal
+        contributions for feature i.
+    """
+    # Start with all features from background (empty coalition w.r.t. x)
+    current_sample = background_sample.copy()
+    prev_pred = predict_fn(current_sample.reshape(1, -1))[0]
+    
+    for feat_idx in permutation:
+        # Add this feature to the coalition (use value from x)
+        current_sample[feat_idx] = x[feat_idx]
+        current_pred = predict_fn(current_sample.reshape(1, -1))[0]
+        
+        # Marginal contribution: v(S ∪ {i}) - v(S)
+        marginal = current_pred - prev_pred
+        contributions[feat_idx].append(marginal)
+        
+        # Reuse this prediction as the "before" for the next feature
+        prev_pred = current_pred
+
+
+def permutation_shap_values(estimator, X, *, background=None, n_permutations=10,
+                            max_samples=None, random_state=None):
+    """
+    Compute per-instance SHAP values using permutation method.
+    
+    This function computes SHAP values for each instance in X using the 
+    permutation method with antithetic sampling for variance reduction.
+    
+    Parameters
+    ----------
+    estimator : estimator object
+        A fitted estimator. Must have a predict or predict_proba method.
+    X : array-like of shape (n_samples, n_features)
+        Data for which to compute SHAP values.
+    background : array-like of shape (n_background, n_features), optional
+        Background data used for computing baseline expectations.
+        If None, uses X as the background.
+    n_permutations : int, default=10
+        Number of permutations to sample. Each permutation generates both
+        forward and backward (antithetic) passes.
+    max_samples : int, float, or None, default=None
+        The number of samples to use from background. If background is large,
+        k-means clustering is used to summarize it to centroids.
+        - If None, use the full background unchanged.
+        - If int, reduce background to that many centroids via k-means.
+        - If float (0-1), reduce background to that fraction of samples.
+    random_state : int, RandomState instance, or None, default=None
+        Controls the randomness. Pass an int for reproducible results.
+        
+    Returns
+    -------
+    shap_values : np.ndarray
+        SHAP values for each instance and feature.
+        - If estimator outputs 1D predictions: shape (n_samples, n_features)
+        - If estimator outputs 2D predictions: shape (n_samples, n_features, n_outputs)
+        
+    Examples
+    --------
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> from sklearn.datasets import make_classification
+    >>> X, y = make_classification(n_samples=100, n_features=10, random_state=42)
+    >>> model = RandomForestClassifier(random_state=42).fit(X, y)
+    >>> shap_values = permutation_shap_values(model, X[:5], background=X, random_state=42)
+    >>> shap_values.shape
+    (5, 10, 2)
+    """
+    X = np.asarray(X)
+    rng = check_random_state(random_state)
+    
+    if background is None:
+        background = X
+    else:
+        background = np.asarray(background)
+    
+    # Summarize background if requested
+    background = _summarize_data(background, max_samples, rng)
+    
+    predict_fn = _get_predict_fn(estimator)
+    
+    # Compute SHAP values for each instance
+    results = []
+    for i in range(X.shape[0]):
+        shap_vals = _compute_shap_single_instance(
+            X[i], predict_fn, background, n_permutations, rng
+        )
+        results.append(shap_vals)
+    
+    return np.array(results)
+
+
+def permutation_shap(estimator, X, y=None, *, background=None, n_repeats=5,
+                     n_permutations=10, max_samples=None, random_state=None):
+    """
+    Compute permutation-based SHAP feature importance.
+    
+    This function follows the scikit-learn permutation_importance API pattern.
+    It computes SHAP values and aggregates them to global feature importance
+    using mean absolute SHAP values.
+    
+    Parameters
+    ----------
+    estimator : estimator object
+        A fitted estimator. Must have a predict or predict_proba method.
+    X : array-like of shape (n_samples, n_features)
+        Data on which to compute feature importance.
+    y : array-like of shape (n_samples,), optional
+        Target values. Not used in computation but accepted for API compatibility.
+    background : array-like of shape (n_background, n_features), optional
+        Background data used for computing baseline expectations.
+        If None, uses X as the background.
+    n_repeats : int, default=5
+        Number of times to repeat the importance computation with different
+        random seeds for variance estimation.
+    n_permutations : int, default=10
+        Number of permutations to sample per repeat for SHAP value estimation.
+    max_samples : int, float, or None, default=None
+        The number of samples to use from background. If background is large,
+        k-means clustering is used to summarize it to centroids.
+        - If None, use the full background unchanged.
+        - If int, reduce background to that many centroids via k-means.
+        - If float (0-1), reduce background to that fraction of samples.
+    random_state : int, RandomState instance, or None, default=None
+        Controls the randomness. Pass an int for reproducible results.
+        
+    Returns
+    -------
+    result : Bunch
+        Dictionary-like object with the following attributes:
+        
+        importances_mean : np.ndarray of shape (n_features,)
+            Mean of feature importances across repeats.
+        importances_std : np.ndarray of shape (n_features,)
+            Standard deviation of feature importances across repeats.
+        importances : np.ndarray of shape (n_features, n_repeats)
+            Raw feature importances for each repeat.
+            
+    Examples
+    --------
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> from sklearn.datasets import make_classification
+    >>> X, y = make_classification(n_samples=100, n_features=10, random_state=42)
+    >>> model = RandomForestClassifier(random_state=42).fit(X, y)
+    >>> result = permutation_shap(model, X, n_repeats=5, random_state=42)
+    >>> result.importances_mean.shape
+    (10,)
+    >>> for i in result.importances_mean.argsort()[::-1][:3]:
+    ...     print(f"Feature {i}: {result.importances_mean[i]:.4f} +/- {result.importances_std[i]:.4f}")
+    """
+    X = np.asarray(X)
+    rng = check_random_state(random_state)
+    n_features = X.shape[1]
+    
+    if background is None:
+        background = X
+    else:
+        background = np.asarray(background)
+    
+    # Summarize background if requested (do this once, not per repeat)
+    background = _summarize_data(background, max_samples, rng)
+    
+    # Collect importances across repeats
+    importances = np.zeros((n_features, n_repeats))
+    
+    for repeat in range(n_repeats):
+        # Compute SHAP values for all instances
+        shap_values = permutation_shap_values(
+            estimator, X, 
+            background=background,
+            n_permutations=n_permutations,
+            max_samples=None,  # Already summarized
+            random_state=rng
+        )
+        
+        # For multi-output, sum absolute values across outputs
+        if shap_values.ndim == 3:
+            # Shape: (n_samples, n_features, n_outputs)
+            # Take mean absolute across samples, sum across outputs
+            feature_importance = np.mean(np.sum(np.abs(shap_values), axis=2), axis=0)
+        else:
+            # Shape: (n_samples, n_features)
+            # Take mean absolute across samples
+            feature_importance = np.mean(np.abs(shap_values), axis=0)
+        
+        importances[:, repeat] = feature_importance
+    
+    return Bunch(
+        importances_mean=np.mean(importances, axis=1),
+        importances_std=np.std(importances, axis=1),
+        importances=importances
+    )
+
+
+class SelectFromShap(SelectorMixin, BaseEstimator):
+    """
+    Feature selector based on permutation SHAP importance.
+    
+    This transformer uses permutation-based SHAP values to select features
+    based on their importance. It supports threshold-based selection and
+    Boruta feature selection.
+    
+    Parameters
+    ----------
+    estimator : estimator object
+        A fitted estimator to compute SHAP importance for.
+    threshold : float, str, or None, default=None
+        The threshold value to use for feature selection. Features with
+        importance greater than or equal to the threshold are selected.
+        - If float, features with importance >= threshold are selected.
+        - If "median", uses the median of feature importances.
+        - If "mean", uses the mean of feature importances.
+        - If None and mode='threshold', defaults to "median".
+        Ignored when mode='boruta'.
+    max_features : int or None, default=None
+        The maximum number of features to select. If not None, only the
+        top max_features features are selected. If both threshold and
+        max_features are specified, max_features takes precedence.
+    mode : {'threshold', 'boruta'}, default='threshold'
+        Feature selection mode:
+        - 'threshold': Select features above importance threshold.
+        - 'boruta': Use Boruta algorithm with shadow features.
+    n_permutations : int, default=10
+        Number of permutations for SHAP value estimation.
+    n_repeats : int, default=5
+        Number of repeats for importance variance estimation.
+    max_samples : int, float, or None, default=None
+        Maximum samples for background summarization.
+    boruta_max_iter : int, default=100
+        Maximum iterations for Boruta algorithm. Only used when mode='boruta'.
+    boruta_alpha : float, default=0.05
+        Significance level for Boruta statistical test. Only used when mode='boruta'.
+    random_state : int, RandomState instance, or None, default=None
+        Controls randomness.
+        
+    Attributes
+    ----------
+    importances_ : np.ndarray of shape (n_features,)
+        Feature importances (mean absolute SHAP values).
+    importances_std_ : np.ndarray of shape (n_features,)
+        Standard deviation of feature importances.
+    support_ : np.ndarray of shape (n_features,)
+        Boolean mask of selected features.
+    n_features_in_ : int
+        Number of features seen during fit.
+    ranking_ : np.ndarray of shape (n_features,)
+        Feature ranking (1 = selected, higher = less important).
+        Only available when mode='boruta'.
+        
+    Examples
+    --------
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> from sklearn.datasets import make_classification
+    >>> X, y = make_classification(n_samples=100, n_features=20, 
+    ...                            n_informative=5, random_state=42)
+    >>> model = RandomForestClassifier(random_state=42).fit(X, y)
+    
+    # Threshold-based selection
+    >>> selector = SelectFromShap(model, threshold='median', random_state=42)
+    >>> X_selected = selector.fit_transform(X)
+    >>> X_selected.shape[1]  # About half the features
+    
+    # Top-k selection
+    >>> selector = SelectFromShap(model, max_features=5, random_state=42)
+    >>> X_selected = selector.fit_transform(X)
+    >>> X_selected.shape[1]
+    5
+    
+    # Boruta selection
+    >>> selector = SelectFromShap(model, mode='boruta', random_state=42)
+    >>> X_selected = selector.fit_transform(X)
+    """
+    
+    def __init__(self, estimator, *, threshold=None, max_features=None,
+                 mode='threshold', n_permutations=10, n_repeats=5,
+                 max_samples=None, boruta_max_iter=100, boruta_alpha=0.05,
+                 random_state=None):
+        self.estimator = estimator
+        self.threshold = threshold
+        self.max_features = max_features
+        self.mode = mode
+        self.n_permutations = n_permutations
+        self.n_repeats = n_repeats
+        self.max_samples = max_samples
+        self.boruta_max_iter = boruta_max_iter
+        self.boruta_alpha = boruta_alpha
+        self.random_state = random_state
+    
+    def fit(self, X, y=None):
+        """
+        Fit the feature selector.
+        
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data.
+        y : array-like of shape (n_samples,), optional
+            Target values. Not used but accepted for pipeline compatibility.
+            
+        Returns
+        -------
+        self : object
+            Returns self.
+        """
+        X = np.asarray(X)
+        self.n_features_in_ = X.shape[1]
+        
+        if self.mode == 'boruta':
+            self._fit_boruta(X, y)
+        else:
+            self._fit_threshold(X, y)
+        
+        return self
+    
+    def _fit_threshold(self, X, y):
+        """Fit using threshold-based selection."""
+        rng = check_random_state(self.random_state)
+        
+        # Compute SHAP importance
+        result = permutation_shap(
+            self.estimator, X, y,
+            background=X,
+            n_repeats=self.n_repeats,
+            n_permutations=self.n_permutations,
+            max_samples=self.max_samples,
+            random_state=rng
+        )
+        
+        self.importances_ = result.importances_mean
+        self.importances_std_ = result.importances_std
+        
+        # Determine support mask
+        if self.max_features is not None:
+            # Select top max_features
+            n_select = min(self.max_features, self.n_features_in_)
+            top_indices = np.argsort(self.importances_)[::-1][:n_select]
+            self.support_ = np.zeros(self.n_features_in_, dtype=bool)
+            self.support_[top_indices] = True
+        else:
+            # Use threshold
+            threshold = self.threshold
+            if threshold is None or threshold == 'median':
+                threshold = np.median(self.importances_)
+            elif threshold == 'mean':
+                threshold = np.mean(self.importances_)
+            
+            self.support_ = self.importances_ >= threshold
+            
+            # Ensure at least one feature is selected
+            if not np.any(self.support_):
+                best_idx = np.argmax(self.importances_)
+                self.support_[best_idx] = True
+    
+    def _fit_boruta(self, X, y):
+        """
+        Fit using Boruta algorithm.
+        
+        The Boruta algorithm:
+        1. Create shadow features (shuffled copies of all original features)
+        2. Train model on real + shadow features
+        3. Compute SHAP importance for all features
+        4. Compare each real feature's importance to max shadow importance
+        5. Use statistical test to classify features as confirmed/rejected/tentative
+        6. Repeat until all features are classified or max_iter reached
+        """
+        rng = check_random_state(self.random_state)
+        n_features = X.shape[1]
+        
+        # Track feature status: 0=tentative, 1=confirmed, -1=rejected
+        status = np.zeros(n_features, dtype=int)
+        
+        # Track hits (times feature beat max shadow)
+        hits = np.zeros(n_features, dtype=int)
+        
+        # Track total trials
+        n_trials = 0
+        
+        for iteration in range(self.boruta_max_iter):
+            # Check if all features are classified
+            if np.all(status != 0):
+                break
+            
+            # Get tentative feature indices
+            tentative_mask = (status == 0)
+            
+            # Create shadow features by shuffling each column independently
+            X_shadow = X.copy()
+            for j in range(n_features):
+                rng.shuffle(X_shadow[:, j])
+            
+            # Combine real and shadow features
+            X_combined = np.hstack([X, X_shadow])
+            
+            # Clone and refit estimator on combined data
+            combined_estimator = clone(self.estimator)
+            combined_estimator.fit(X_combined, y)
+            
+            # Compute SHAP importance for combined features
+            result = permutation_shap(
+                combined_estimator, X_combined, y,
+                background=X_combined,
+                n_repeats=1,  # Single repeat per iteration
+                n_permutations=self.n_permutations,
+                max_samples=self.max_samples,
+                random_state=rng
+            )
+            
+            importances = result.importances_mean
+            real_importances = importances[:n_features]
+            shadow_importances = importances[n_features:]
+            
+            # Max shadow importance (threshold)
+            max_shadow = np.max(shadow_importances)
+            
+            # Update hits for tentative features
+            for j in range(n_features):
+                if status[j] == 0:  # Tentative
+                    if real_importances[j] > max_shadow:
+                        hits[j] += 1
+            
+            n_trials += 1
+            
+            # Statistical test using binomial distribution
+            # Under null hypothesis, P(beat max shadow) = 0.5
+            # Use two-tailed test with Bonferroni correction
+            if n_trials >= 5:  # Need minimum trials for stable test
+                for j in range(n_features):
+                    if status[j] == 0:  # Tentative
+                        # Binomial test: probability of getting this many hits by chance
+                        # Using normal approximation for binomial
+                        p_value = self._binomial_test(hits[j], n_trials)
+                        
+                        if p_value < self.boruta_alpha / n_features:  # Bonferroni correction
+                            if hits[j] > n_trials / 2:
+                                status[j] = 1  # Confirmed
+                            else:
+                                status[j] = -1  # Rejected
+        
+        # Final classification: treat remaining tentative as rejected
+        self.support_ = (status == 1)
+        
+        # If no features confirmed, select the one with most hits
+        if not np.any(self.support_):
+            best_idx = np.argmax(hits)
+            self.support_[best_idx] = True
+        
+        # Compute final importances on original features
+        result = permutation_shap(
+            self.estimator, X, y,
+            background=X,
+            n_repeats=self.n_repeats,
+            n_permutations=self.n_permutations,
+            max_samples=self.max_samples,
+            random_state=rng
+        )
+        
+        self.importances_ = result.importances_mean
+        self.importances_std_ = result.importances_std
+        
+        # Create ranking: 1 for confirmed, 2 for tentative, 3 for rejected
+        self.ranking_ = np.where(status == 1, 1, np.where(status == 0, 2, 3))
+    
+    def _binomial_test(self, k, n, p=0.5):
+        """
+        Two-tailed binomial test using normal approximation.
+        
+        Tests whether the number of successes k in n trials is
+        significantly different from expected under p=0.5.
+        
+        Parameters
+        ----------
+        k : int
+            Number of successes (hits).
+        n : int
+            Number of trials.
+        p : float, default=0.5
+            Null hypothesis probability.
+            
+        Returns
+        -------
+        p_value : float
+            Two-tailed p-value.
+        """
+        # Normal approximation to binomial
+        mean = n * p
+        std = np.sqrt(n * p * (1 - p))
+        
+        if std == 0:
+            return 1.0
+        
+        # Z-score
+        z = abs(k - mean) / std
+        
+        # Two-tailed p-value using normal CDF approximation
+        # Using error function approximation
+        p_value = 2 * (1 - self._norm_cdf(z))
+        
+        return p_value
+    
+    def _norm_cdf(self, x):
+        """
+        Standard normal CDF approximation.
+        
+        Uses the error function approximation.
+        """
+        # Approximation using the error function
+        # CDF(x) = 0.5 * (1 + erf(x / sqrt(2)))
+        return 0.5 * (1 + self._erf(x / np.sqrt(2)))
+    
+    def _erf(self, x):
+        """
+        Error function approximation.
+        
+        Abramowitz and Stegun approximation (max error ~ 1.5e-7).
+        """
+        # Constants
+        a1 = 0.254829592
+        a2 = -0.284496736
+        a3 = 1.421413741
+        a4 = -1.453152027
+        a5 = 1.061405429
+        p = 0.3275911
+        
+        sign = np.sign(x)
+        x = np.abs(x)
+        
+        t = 1.0 / (1.0 + p * x)
+        y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * np.exp(-x * x)
+        
+        return sign * y
+    
+    def _get_support_mask(self):
+        """Get the boolean mask of selected features."""
+        return self.support_
+```
+
 ## Tree Ensemble Hashing
 
 _August 2025_
