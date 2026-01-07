@@ -2,6 +2,274 @@
 
 A collection of experiments, code dump etc, that are more for the vibe than for the writing (i.e. these may be heavily written by AI, but are still "cool").
 
+# 2026
+
+## Full Text Search
+
+Although semantic search is the typical go-to full text search generally doesn't get as much attention due to the perceived difficulty to setup. [Here](https://github.com/NoRaincheck/fulltextsearch/tree/main) is a `duckdb` variant that should help with that
+
+```py
+"""
+A full-text search client using DuckDB for local RAG (Retrieval Augmented Generation) applications.
+
+This module provides a simple interface for creating collections of documents,
+inserting documents with metadata, and performing full-text search operations
+using DuckDB's full-text search capabilities.
+"""
+
+# from duckdb_extensions import import_extension
+
+# import_extension("fts", force_install=True)
+
+import duckdb
+import orjson
+from liquid import Template
+
+type Id = str
+type Content = str
+type Metadata = dict[str, str]
+
+create_collection = Template("""
+CREATE TABLE {{collection}} (
+    id VARCHAR PRIMARY KEY,
+    content TEXT,
+    metadata JSON
+);
+""")
+
+insert_into_collection = Template("""
+    INSERT into {{collection}} VALUES (?, ?, ?)
+""")
+
+insert_or_replace_into_collection = Template("""
+    INSERT OR REPLACE into {{collection}} VALUES (?, ?, ?)
+""")
+
+count_collection = Template("""
+    SELECT COUNT(*) FROM {{collection}}
+""")
+
+create_fts_index = Template("""
+    PRAGMA create_fts_index('{{collection}}', 'id', 'content', overwrite=1)
+""")
+
+search_with_metadata_filter = Template("""
+    SELECT id, content, metadata, score
+    FROM (
+        SELECT id, content, metadata, fts_main_{{collection}}.match_bm25(id, ?) AS score
+        FROM {{collection}}
+    )
+    WHERE score IS NOT NULL
+    AND {{where_clause}}
+    ORDER BY score DESC
+    {{limit_clause}}
+""")
+
+search_without_metadata_filter = Template("""
+    SELECT id, content, metadata, score
+    FROM (
+        SELECT id, content, metadata, fts_main_{{collection}}.match_bm25(id, ?) AS score
+        FROM {{collection}}
+    )
+    WHERE score IS NOT NULL
+    ORDER BY score DESC
+    {{limit_clause}}
+""")
+
+
+class Client:
+    """
+    A client for performing full-text search operations using DuckDB.
+
+    This client allows you to create collections (tables) of documents,
+    insert documents with content and metadata, and perform full-text searches
+    on the content.
+
+    Attributes:
+        con: The DuckDB connection object used for database operations.
+    """
+
+    def __init__(self, db: str = ":memory:"):
+        """
+        Initialize the Client with a DuckDB connection.
+
+        Args:
+            db: Path to the DuckDB database file. Use ':memory:' for an
+                in-memory database (default). For persistent storage, provide
+                a file path.
+        """
+        self.con = duckdb.connect(db)
+        self.con.execute("INSTALL fts")
+        self.con.execute("LOAD fts")
+
+    def create_collection(self, collection: str):
+        """
+        Create a new collection (table) for storing documents.
+
+        Args:
+            collection: The name of the collection to create. This will be used
+                        as the table name in DuckDB.
+
+        Note:
+            The collection will have the following schema:
+            - id: VARCHAR PRIMARY KEY (document identifier)
+            - content: TEXT (document content for full-text search)
+            - metadata: BLOB (serialized JSON metadata)
+        """
+        self.con.execute(create_collection.render(collection=collection))
+
+    def insert(
+        self, collection: str, data: list[tuple[Id, Content, Metadata]], replace=False
+    ):
+        # Convert metadata to JSON string for storage in JSON column
+        serialized_data: list[tuple[Id, Content, str]] = [
+            (id, content, orjson.dumps(metadata, default=str).decode("utf-8"))
+            for id, content, metadata in data
+        ]
+        insert_template = (
+            insert_or_replace_into_collection if replace else insert_into_collection
+        )
+        self.con.executemany(
+            insert_template.render(collection=collection), serialized_data
+        )
+
+        # Create or update FTS index to include new data (only content since metadata is JSON)
+        # Only create FTS index if there's data in the table
+        count_sql = count_collection.render(collection=collection)
+        count = self.con.execute(count_sql).fetchone()[0]
+        if count > 0:
+            try:
+                # Always recreate the FTS index after inserting data to ensure it's up to date
+                fts_sql = create_fts_index.render(collection=collection)
+                self.con.execute(fts_sql)
+            except Exception as e:
+                pass  # FTS index creation failed
+
+    def collection_exists(self, collection: str) -> bool:
+        """
+        Check if a collection exists in the database
+
+        Args:
+            collection: The name of the collection to check
+
+        Returns:
+            True if the collection exists, False otherwise
+        """
+        result = self.con.execute(
+            """
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'main'
+            AND table_name = ?
+        """,
+            [collection],
+        ).fetchone()
+
+        return result is not None
+
+    def search(
+        self,
+        collection: str,
+        query: str,
+        limit: int = None,
+        metadata_filter: dict | None = None,
+    ):
+        """
+        Search using FTS in DuckDB
+
+        Args:
+            collection: The name of the collection to search in
+            query: The search query string
+            limit: Maximum number of results to return
+            metadata_filter: Optional dictionary to filter results by metadata
+
+        Returns:
+            List of tuples containing (id, content, metadata, score) for matching documents
+        """
+        # Check if there's data in the collection before attempting FTS
+        count_sql = count_collection.render(collection=collection)
+        count = self.con.execute(count_sql).fetchone()[0]
+
+        if count == 0:
+            # If no data in collection, return empty list
+            return []
+
+        # Create FTS index if it doesn't exist - only for content field since metadata is BLOB
+        fts_sql = create_fts_index.render(collection=collection)
+        self.con.execute(fts_sql)
+
+        # Build the query using json dot notation
+        if metadata_filter:
+            # Build WHERE clause for metadata filtering using JSONPath
+            where_conditions = []
+            params = []
+
+            for key, value in metadata_filter.items():
+                # Handle JSONPath dot notation by converting to DuckDB JSON access
+                # For example: "nested.field" becomes metadata->'$.nested.field'
+                # DuckDB supports the -> operator for JSON extraction
+                json_path = f"$.{key}"
+
+                # Extract the value from JSON and compare with the filter value
+                if isinstance(value, bool):
+                    # For boolean values, extract as string and compare
+                    where_conditions.append(
+                        f"json_extract_string(metadata, '{json_path}') = ?"
+                    )
+                    # Convert boolean to string representation for comparison
+                    params.append(str(value).lower())
+                elif isinstance(value, (int, float)):
+                    # For numeric values, we need to extract and cast appropriately
+                    where_conditions.append(
+                        f"CAST(json_extract_string(metadata, '{json_path}') AS DOUBLE) = ?"
+                    )
+                    params.append(value)
+                elif isinstance(value, str):
+                    where_conditions.append(
+                        f"json_extract_string(metadata, '{json_path}') = ?"
+                    )
+                    params.append(value)
+                else:
+                    # For other types, convert to string for comparison
+                    where_conditions.append(
+                        f"json_extract_string(metadata, '{json_path}') = ?"
+                    )
+                    params.append(str(value))
+
+            # Construct the full query with FTS and metadata filtering
+            # Use a subquery or CTE to avoid calling match_bm25 twice
+            where_clause = " AND ".join(where_conditions)
+            limit_clause = f"LIMIT {limit}" if limit else ""
+
+            search_query = search_with_metadata_filter.render(
+                collection=collection,
+                where_clause=where_clause,
+                limit_clause=limit_clause
+            )
+
+            results = self.con.execute(search_query, [query] + params).fetchall()
+        else:
+            # Original query without metadata filtering
+            limit_clause = f"LIMIT {limit}" if limit else ""
+
+            search_query = search_without_metadata_filter.render(
+                collection=collection,
+                limit_clause=limit_clause
+            )
+
+            results = self.con.execute(search_query, [query]).fetchall()
+
+        # Deserialize the metadata from JSON string to Python object
+        deserialized_results = []
+        for id, content, metadata, score in results:
+            # If metadata is a string (JSON string), parse it to Python object
+            if isinstance(metadata, str):
+                metadata = orjson.loads(metadata.encode("utf-8"))
+            deserialized_results.append((id, content, metadata, score))
+
+        return deserialized_results
+```
+
 # 2025
 
 ## Lightweight SHAP Implementation
