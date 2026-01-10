@@ -1,5 +1,9 @@
 # A Weblog
 
+# 2026
+
+[202601](/_blog/202601.md ':include')
+
 # 2025
 
 [202512](/_blog/202512.md ':include')
