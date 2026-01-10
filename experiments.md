@@ -1,12 +1,15 @@
 # Experiments
 
-A collection of experiments, code dump etc, that are more for the vibe than for the writing (i.e. these may be heavily written by AI, but are still "cool").
+A collection of experiments, code dump etc, that are more for the vibe than for the writing (i.e. these may be heavily
+written by AI, but are still "cool").
 
 # 2026
 
 ## Full Text Search
 
-Although semantic search is the typical go-to full text search generally doesn't get as much attention due to the perceived difficulty to setup. [Here](https://github.com/NoRaincheck/fulltextsearch/tree/main) is a `duckdb` variant that should help with that
+Although semantic search is the typical go-to full text search generally doesn't get as much attention due to the
+perceived difficulty to setup. [Here](https://github.com/NoRaincheck/fulltextsearch/tree/main) is a `duckdb` variant
+that should help with that
 
 ```py
 """
@@ -276,7 +279,8 @@ class Client:
 
 _December 2025_
 
-When performing SHAP, sometimes the requirements to install are overly onerous. This is a lightweight implementation of Permutation SHAP including helper functions matching the style of `scikit-learn` interface.
+When performing SHAP, sometimes the requirements to install are overly onerous. This is a lightweight implementation of
+Permutation SHAP including helper functions matching the style of `scikit-learn` interface.
 
 ```py
 """
@@ -1001,7 +1005,12 @@ class SelectFromShap(SelectorMixin, BaseEstimator):
 
 _August 2025_
 
-I've been thinking about how to encode decision trees (on and off). This is a vibe-coded approach that tries to encode the path of every instance based on what leaf of the decision tree(s) the instance lands on. The rough idea is that it also gets 'weight' from every parent node (weighted based on distance to leaf) and is encoded by feature hashing, which allows it to be aggregated by all trees. It somewhat works. I think this kind of approach may be useful for scenarios where online learning with just a linear head is used, especially when feature engineering (from the trees) is done in an online manner, for example via Mondrian Trees.
+I've been thinking about how to encode decision trees (on and off). This is a vibe-coded approach that tries to encode
+the path of every instance based on what leaf of the decision tree(s) the instance lands on. The rough idea is that it
+also gets 'weight' from every parent node (weighted based on distance to leaf) and is encoded by feature hashing, which
+allows it to be aggregated by all trees. It somewhat works. I think this kind of approach may be useful for scenarios
+where online learning with just a linear head is used, especially when feature engineering (from the trees) is done in
+an online manner, for example via Mondrian Trees.
 
 ```py
 import mmh3
@@ -1428,11 +1437,18 @@ def create_tree_ensemble_hash(
 
 _June 2025_
 
-Using LLMs for doing arbitration or classification is nothing new. Generally I found that "smaller" local LLMs struggled or led to overly optimistic results. I think 'smaller' models are finally performant enough (to some extent at least) where coming up with binary outcomes in a structured manner is "good enough". In general as of writing things still aren't good enough. This is reflected in things like the [Goose Blogpost](https://block.github.io/goose/blog/2025/03/14/goose-ollama/) where 32gb of RAM is still generally recommended. Here, I use the very good `gemma-3-12b` model to accomplish this -- I generally found models smaller/older than this failed to properly perform structured outputs in a meaningful manner. 
+Using LLMs for doing arbitration or classification is nothing new. Generally I found that "smaller" local LLMs struggled
+or led to overly optimistic results. I think 'smaller' models are finally performant enough (to some extent at least)
+where coming up with binary outcomes in a structured manner is "good enough". In general as of writing things still
+aren't good enough. This is reflected in things like the
+[Goose Blogpost](https://block.github.io/goose/blog/2025/03/14/goose-ollama/) where 32gb of RAM is still generally
+recommended. Here, I use the very good `gemma-3-12b` model to accomplish this -- I generally found models smaller/older
+than this failed to properly perform structured outputs in a meaningful manner.
 
-The below example is based on [Tricube Tales](https://www.drivethrurpg.com/en/product/294202/tricube-tales) which is a TTRPG released under CC BY 3.0 license. 
+The below example is based on [Tricube Tales](https://www.drivethrurpg.com/en/product/294202/tricube-tales) which is a
+TTRPG released under CC BY 3.0 license.
 
-```py
+````py
 import os
 from pathlib import Path
 from pprint import pprint
@@ -1548,7 +1564,7 @@ if __name__ == "__main__":
         )
     )
     pprint(result)
-```
+````
 
 Output:
 
@@ -1578,7 +1594,7 @@ Using `Qwen3-8B` model also works relative well with this output:
 
 _May 2025_
 
-Sometimes you just want the convenience of numpy-like notation for slicing, and setting values. 
+Sometimes you just want the convenience of numpy-like notation for slicing, and setting values.
 
 ```py
 from copy import deepcopy
@@ -1800,7 +1816,8 @@ def ones(shape):
 
 _March 2025_
 
-Okay, so this isn't that "new" though sometimes its hard to find a "winner". This is one that I like for writing code reviews.
+Okay, so this isn't that "new" though sometimes its hard to find a "winner". This is one that I like for writing code
+reviews.
 
 **Prompt**
 
@@ -1840,8 +1857,8 @@ At the end, provide an Estimated Merge Risk rating (Low, Medium, High) based on 
 Input: Provide the git diff for analysis.
 ```
 
-What is interesting is how near (or far?) it is from curated offerings. For example this is the one from [continue.dev](https://github.com/continuedev/prompt-file-examples/blob/main/code-review.prompt)
-
+What is interesting is how near (or far?) it is from curated offerings. For example this is the one from
+[continue.dev](https://github.com/continuedev/prompt-file-examples/blob/main/code-review.prompt)
 
     <system>
     You will be acting as a senior software engineer performing a code review for a colleague.
@@ -1932,15 +1949,16 @@ What is interesting is how near (or far?) it is from curated offerings. For exam
 
     Think through your feedback step by step before replying.
 
-
-
 ## IsoForest with k-NN
 
 _February 2025_
 
-Following on the general theme of using random-ness to infer or generate predictions, I've always been very curious about isolation forests, more specifically given the innate measure of "similarity" or "distance" can we use this in the supervised learning scenario via k-NN?
+Following on the general theme of using random-ness to infer or generate predictions, I've always been very curious
+about isolation forests, more specifically given the innate measure of "similarity" or "distance" can we use this in the
+supervised learning scenario via k-NN?
 
-Below is some code which implements this completely using stdlib Python with no dependencies on `numpy`. Written with heavy assistance from LLMs.
+Below is some code which implements this completely using stdlib Python with no dependencies on `numpy`. Written with
+heavy assistance from LLMs.
 
 ```python
 import random
@@ -2380,15 +2398,25 @@ if __name__ == "__main__":
     demo_partial_fit()
 ```
 
-Commentary from the future: this approach is very similar to Mondrian Trees, in which the random partitions are induced by a Mondrian Process. I should include a "fast approximation" to Mondrian processes and expand it to multi-dimensions using standard lib in the future. 
+Commentary from the future: this approach is very similar to Mondrian Trees, in which the random partitions are induced
+by a Mondrian Process. I should include a "fast approximation" to Mondrian processes and expand it to multi-dimensions
+using standard lib in the future.
 
 ## Brownian Bridges
 
 _February 2025_
 
-I got LLM via prompting to recreate how it may have generated the simple kriging diagram on the wikipedia page. I intentionally got it to do it via brownian bridges rather than the "typical" guassian process way simply because I was interested in brownian bridges. I may have made changes for ease of implementation (I was thinking about re-implementing it using stdlib or in another language as a close approximation), though the "idea" remains. This technique maybe useful if one wants to do something better than sampling over a grid search.
+I got LLM via prompting to recreate how it may have generated the simple kriging diagram on the wikipedia page. I
+intentionally got it to do it via brownian bridges rather than the "typical" guassian process way simply because I was
+interested in brownian bridges. I may have made changes for ease of implementation (I was thinking about re-implementing
+it using stdlib or in another language as a close approximation), though the "idea" remains. This technique maybe useful
+if one wants to do something better than sampling over a grid search.
 
-To extend to multiple dimensions, we can make use of tree-parzen like approach to sample per region (chosen heuristically) and presume univariate relationships (which was the approach taken in the original paper, though later approaches used multivariate KDEs). For the purposes of a simplistic implementation, simplifying assumptions will suffice. For example, it could be that the tree-structure restricts sampling to a fixed number of points per a region to determine whether or not a split is necessary. 
+To extend to multiple dimensions, we can make use of tree-parzen like approach to sample per region (chosen
+heuristically) and presume univariate relationships (which was the approach taken in the original paper, though later
+approaches used multivariate KDEs). For the purposes of a simplistic implementation, simplifying assumptions will
+suffice. For example, it could be that the tree-structure restricts sampling to a fixed number of points per a region to
+determine whether or not a split is necessary.
 
 ```python
 # %%

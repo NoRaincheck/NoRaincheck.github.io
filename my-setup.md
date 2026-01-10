@@ -1,20 +1,29 @@
 ## Shell and Fonts
 
-[Iosevka](https://github.com/be5invis/Iosevka) - because I work off my laptop screen alot, specifically a [custom variant](https://github.com/HeardACat/Iosevka-Curly/tree/main).
+[Iosevka](https://github.com/be5invis/Iosevka) - because I work off my laptop screen alot, specifically a
+[custom variant](https://github.com/HeardACat/Iosevka-Curly/tree/main).
 
-For general "stuff", I currently enjoying the "gothic" router font aesthetic, which is [used in this blog](https://heardacat.github.io/nationalpark-webfont/).
+For general "stuff", I currently enjoying the "gothic" router font aesthetic, which is
+[used in this blog](https://heardacat.github.io/nationalpark-webfont/).
 
-For my shell:  
-- [Oh My Zsh](https://ohmyz.sh/#install)  
-- [Starship](https://starship.rs/)  
+For my shell:
+
+- [Oh My Zsh](https://ohmyz.sh/#install)
+- [Starship](https://starship.rs/)
 
 ## Themes
 
-[Catppuccin](https://catppuccin.com/) has started to replace [Dracula](https://draculatheme.com/) as my daily driver, though I still use some [Dracula](https://draculatheme.com/) themes like the terminal which I believe to be superior option still. Alternatives I've considered are [Rosé Pine](https://rosepinetheme.com/) which I've briefly toyed with, but haven't taken seriously. 
+[Catppuccin](https://catppuccin.com/) has started to replace [Dracula](https://draculatheme.com/) as my daily driver,
+though I still use some [Dracula](https://draculatheme.com/) themes like the terminal which I believe to be superior
+option still. Alternatives I've considered are [Rosé Pine](https://rosepinetheme.com/) which I've briefly toyed with,
+but haven't taken seriously.
 
 ## Text Completion via LLMs
 
-[llama-vscode](https://marketplace.visualstudio.com/items?itemName=ggml-org.llama-vscode) with [llama.cpp](https://marketplace.visualstudio.com/items?itemName=ggml-org.llama-vscode). It's proven to be good enough and gets out of the way (plus I can self-host this). I've had good success using `Devstral-Small` or even a general LLM like `gemma-3-12b` variants
+[llama-vscode](https://marketplace.visualstudio.com/items?itemName=ggml-org.llama-vscode) with
+[llama.cpp](https://marketplace.visualstudio.com/items?itemName=ggml-org.llama-vscode). It's proven to be good enough
+and gets out of the way (plus I can self-host this). I've had good success using `Devstral-Small` or even a general LLM
+like `gemma-3-12b` variants
 
 ```sh
 llama-server \
@@ -23,7 +32,8 @@ llama-server \
     --ctx-size 0 --cache-reuse 256
 ```
 
-I've also started using `aider` for `/ask` commands. Though I generally don't use local LLMs for agentic code editing as my daily driver.
+I've also started using `aider` for `/ask` commands. Though I generally don't use local LLMs for agentic code editing as
+my daily driver.
 
 ```sh
 uvx --from aider-install aider \
@@ -31,12 +41,13 @@ uvx --from aider-install aider \
   --openai-api-base http://127.0.0.1:8080/ --openai-api-key NONE \
   --map-tokens 1024 \
   --no-show-model-warnings \
-  --no-gitignore 
+  --no-gitignore
 ```
 
 ## VSCode Settings
 
-I generally like to leave things to default, since moving to other people's computer and workspaces things don't get confusing. Though the `keybindings.json` I generally stick to is the terminal focus variant:
+I generally like to leave things to default, since moving to other people's computer and workspaces things don't get
+confusing. Though the `keybindings.json` I generally stick to is the terminal focus variant:
 
 ```json
 [
@@ -120,13 +131,12 @@ gpg --decrypt foo.gpg
 gpg --decrypt foo.gpg | pbcopy
 ```
 
-
 ## Misc
 
-[stats](https://formulae.brew.sh/cask/stats), because why not?  
-[Insomnia](https://github.com/Kong/insomnia), postman, but self-hosted  
-[KeePass](https://en.wikipedia.org/wiki/KeePass), self-hosted password manager  
-[Obsidian](https://obsidian.md/) for taking notes, with [Harper LSP Plugin](https://writewithharper.com/docs/integrations/obsidian)
+[stats](https://formulae.brew.sh/cask/stats), because why not?\
+[Insomnia](https://github.com/Kong/insomnia), postman, but self-hosted\
+[KeePass](https://en.wikipedia.org/wiki/KeePass), self-hosted password manager\
+[Obsidian](https://obsidian.md/) for taking notes, with
+[Harper LSP Plugin](https://writewithharper.com/docs/integrations/obsidian)
 
 I've been keeping a 10+ year old computer alive. [Pale Moon](https://www.palemoon.org/) has been amazing for this.
-
