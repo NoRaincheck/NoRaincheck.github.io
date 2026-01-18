@@ -5,6 +5,30 @@ written by AI, but are still "cool").
 
 # 2026
 
+## pre-commit hook for anonymous git commits
+
+```sh
+#!/bin/sh
+# Pre-commit hook to check that git config contains $NAME
+NAME='~myname'
+
+# Define color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Check if user.name
+USER_NAME=$(git config user.name)
+if ! echo "$USER_NAME" | grep -q "${NAME}"; then
+    echo "${RED}❌ Error: git config user.name does not contain '${NAME}'${NC}"
+    echo "${YELLOW}Current user.name: $USER_NAME${NC}"
+    exit 1
+fi
+
+echo "${GREEN}✅ Git config validation passed: user.name and user.email contain '${NAME}'${NC}"
+```
+
 ## Full Text Search
 
 Although semantic search is the typical go-to full text search generally doesn't get as much attention due to the
