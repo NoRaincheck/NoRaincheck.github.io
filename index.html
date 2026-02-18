@@ -39,14 +39,49 @@
     </style>
   </head>
 
-  <body>
+<body>
     <div id="app"></div>
-    <script>
+    <style>
+      /* override font-weight style when it's inside an `a` when docsify styles it */
+      .markdown-section a.mermaid {
+        font-weight: normal;
+      }
+    </style>
+    <script type="module" data-cfasync="false">
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+      mermaid.initialize({
+        startOnLoad: false,
+      });
+
+      let svgCounter = 0;
+
       window.$docsify = {
         loadSidebar: true,
-        subMaxLevel: 3,
         alias: {
-          "/.*/_sidebar.md": "/_sidebar.md",
+          '/.*/_sidebar.md': '/_sidebar.md'
+        },      
+        markdown: {
+          renderer: {
+            code(code, lang) {
+              if (lang === "mermaid") {
+                const svgName = `mermaid-svg-${svgCounter++}`;
+                const MERMAID_CONTAINER_ID = `${svgName}-container`;
+                mermaid.render(svgName, code).then(({ svg }) => {
+                  const containerElement = document.querySelector(
+                    `#${MERMAID_CONTAINER_ID}`
+                  );
+                  if (containerElement) {
+                    containerElement.innerHTML = svg;
+                  } else {
+                    console.error(`Error: #${MERMAID_CONTAINER_ID} not found`);
+                  }
+                });
+                return `<div class="mermaid" id="${MERMAID_CONTAINER_ID}"></div>`;
+              }
+              return this.origin.code.apply(this, arguments);
+            },
+          },
         },
       };
     </script>
@@ -73,5 +108,6 @@
     <script
       src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-ini.min.js"
     ></script>
-  </body>
+
+</body>
 </html>
