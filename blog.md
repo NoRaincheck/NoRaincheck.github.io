@@ -2,6 +2,8 @@
 
 # 2026
 
+[202604](/_blog/202604.md ":include")
+
 [202603](/_blog/202603.md ":include")
 
 [202602](/_blog/202602.md ":include")
