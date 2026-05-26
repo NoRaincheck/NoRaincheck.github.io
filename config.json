@@ -1,0 +1,16 @@
+{
+  "site_title": "NoRaincheck",
+  "footer": "Built with Raleigh",
+  "date_format": "%B %Y",
+  "date_format_full": "%B, %Y",
+  "blog_index": "blog.html",
+  "nav": [
+    {"name": "Home", "href": "/"},
+    {"name": "Blog", "href": "/blog.html"},
+    {"name": "Experiments", "href": "/experiments.html"},
+    {"name": "Looking Forward", "href": "/looking-forward.html"},
+    {"name": "My Setup", "href": "/my-setup.html"},
+    {"name": "Bookmarks", "href": "/bookmarks.html"},
+    {"name": "Tutorials", "href": "/nvim.html"}
+  ]
+}

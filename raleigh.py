@@ -342,7 +342,7 @@ HTML_TEMPLATE = """\
 {content}
 </main>
 </div>
-<footer class="site-footer"><small>Built with Raleigh</small></footer>
+<footer class="site-footer"><small>{footer}</small></footer>
 </body>
 </html>"""
 
@@ -371,36 +371,26 @@ class Site:
         self,
         source_dir: str | Path = "source",
         output_dir: str | Path = "_site",
-        site_title: str = "My Site",
+        site_title: str | None = None,
     ) -> None:
         self.source = Path(source_dir).resolve()
         self.output = Path(output_dir).resolve()
-        self.site_title = site_title
+        self._config = self._load_config()
+        self.site_title = site_title or self._config.get("site_title", "My Site")
+
+    def _load_config(self) -> dict:
+        config_path = self.source.parent / "config.json"
+        if config_path.is_file():
+            return json.loads(config_path.read_text(encoding="utf-8"))
+        return {}
 
     def _nav_links(self) -> str:
-        links = [
-            ("Home", "/"),
-            ("Blog", "blog.html"),
-            ("Experiments", "experiments.html"),
-            ("Looking Forward", "looking-forward.html"),
-            ("My Setup", "my-setup.html"),
-            ("Bookmarks", "bookmarks.html"),
-        ]
-        return " ".join(f'<a href="{h}">{n}</a>' for n, h in links)
+        links = self._config.get("nav", [{"name": "Home", "href": "/"}])
+        return " ".join(f'<a href="{item["href"]}">{item["name"]}</a>' for item in links)
 
     def _sidebar_items(self) -> str:
-        items = []
-        for name, href in [
-            ("Home", "/"),
-            ("Blog", "blog.html"),
-            ("Experiments", "experiments.html"),
-            ("Looking Forward", "looking-forward.html"),
-            ("My Setup", "my-setup.html"),
-            ("Bookmarks", "bookmarks.html"),
-            ("Tutorials", "nvim.html"),
-        ]:
-            items.append(f'<li><a href="{href}">{name}</a></li>')
-        return "\n".join(items)
+        links = self._config.get("nav", [{"name": "Home", "href": "/"}])
+        return "\n".join(f'<li><a href="{item["href"]}">{item["name"]}</a></li>' for item in links)
 
     def _format_page(self, title: str, content: str) -> str:
         css_escaped = _CSS.replace("</style>", "<\\/style>")
@@ -410,6 +400,7 @@ class Site:
             css=css_escaped,
             nav_links=self._nav_links(),
             sidebar_items=self._sidebar_items(),
+            footer=self._config.get("footer", "Built with Raleigh"),
             content=content,
         )
 
@@ -477,17 +468,21 @@ class Site:
                     post_links += "</ul>\n\n"
                 post_links += f"<h2>{year_str}</h2>\n<ul>\n"
                 current_year = year_str
-            date_str = d.strftime("%B %Y") if d else ""
+            date_format = self._config.get("date_format", "%B %Y")
+            date_str = d.strftime(date_format) if d else ""
             title = meta.get("title", "Untitled")
-            tag_list = ", ".join(str(t) for t in (meta.get("tags") or []))
+            tag_links = " ".join(
+                f'<a href="/tags/{slugify(t)}.html">{t}</a>'
+                for t in (meta.get("tags") or [])
+            )
             link_path = f"posts/{slugify(title)}.html"
             post_links += (
                 f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
                 + (
                     f'\n<p class="post-date">{date_str}'
-                    + (f"  · <span>{tag_list}</span>" if tag_list else "")
+                    + (f"  · {tag_links}" if tag_links else "")
                     + "</p>"
-                    if date_str or tag_list
+                    if date_str or tag_links
                     else ""
                 )
                 + "\n</article>\n"
@@ -495,36 +490,42 @@ class Site:
         if current_year:
             post_links += "</ul>\n"
 
+        blog_index = self._config.get("blog_index", "blog.html")
         blog_html = self._format_page(
             "Blog",
             "<h1>Blog Posts</h1>\n" + post_links,
         )
-        (self.output / "blog.html").write_text(blog_html, encoding="utf-8")
+        (self.output / blog_index).write_text(blog_html, encoding="utf-8")
         count += 1
 
         # Generate index page listing posts
         home_post_list = ""
         for meta, _path in posts[:10]:
             d = parse_date(meta.get("date", ""))
-            date_str = d.strftime("%B %Y") if d else ""
+            date_format = self._config.get("date_format", "%B %Y")
+            date_str = d.strftime(date_format) if d else ""
             title = meta.get("title", "Untitled")
-            tag_list = ", ".join(str(t) for t in (meta.get("tags") or []))
+            tag_links = " ".join(
+                f'<a href="/tags/{slugify(t)}.html">{t}</a>'
+                for t in (meta.get("tags") or [])
+            )
             link_path = f"posts/{slugify(title)}.html"
             home_post_list += (
                 f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
                 + (
                     f'\n<p class="post-date">{date_str}'
-                    + (f"  · <span>{tag_list}</span>" if tag_list else "")
+                    + (f"  · {tag_links}" if tag_links else "")
                     + "</p>"
-                    if date_str or tag_list
+                    if date_str or tag_links
                     else ""
                 )
                 + "\n</article>"
             )
+        blog_index = self._config.get("blog_index", "blog.html")
         index_html = self._format_page(
             "Home",
             (home_post_list or "<p>No posts yet.</p>")
-            + '<p style="margin-top:2rem"><a href="blog.html">View all posts →</a></p>',
+            + f'<p style="margin-top:2rem"><a href="{blog_index}">View all posts →</a></p>',
         )
         (self.output / "index.html").write_text(index_html, encoding="utf-8")
         count += 1
@@ -535,14 +536,17 @@ class Site:
             html_body = md_to_html(body)
             title = meta.get("title", "Untitled")
             d = parse_date(meta.get("date", ""))
-            date_str = d.strftime("%B %d, %Y") if d else ""
+            date_str = d.strftime(self._config.get("date_format_full", "%B %d, %Y")) if d else ""
             tags = meta.get("tags", []) or []
-            tag_list = ", ".join(f"<span>{t}</span>" for t in tags)
+            tag_links = " ".join(
+                f'<a href="/tags/{slugify(t)}.html">{t}</a>'
+                for t in tags
+            )
 
             post_html = self._format_page(
                 title,
                 f'<h1>{title}</h1>\n<p class="post-date">{date_str}'
-                + (f"  · {tag_list}" if tag_list else "")
+                + (f"  · {tag_links}" if tag_links else "")
                 + "</p>\n\n"
                 + html_body,
             )
@@ -563,7 +567,7 @@ class Site:
         for t, items in sorted(tags.items()):
             items.sort(key=lambda x: x[1], reverse=True)
             link_items = "".join(
-                f'<article class="post-entry"><h2><a href="posts/{slugify(str(m.get("title", "")))}.html">{m.get("title", "Untitled")}</a></h2></article>\n'
+                f'<article class="post-entry"><h2><a href="/posts/{slugify(str(m.get("title", "")))}.html">{m.get("title", "Untitled")}</a></h2></article>\n'
                 for m, _d in items
             )
             tag_html = self._format_page(
@@ -592,7 +596,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "-o", "--output", default="_site", help="Output directory (default: _site)"
     )
-    parser.add_argument("--title", default="NoRaincheck", help="Site title")
+    parser.add_argument("--title", help="Site title (default: config.json site_title, or 'My Site')")
 
     args = parser.parse_args(argv)
     site = Site(source_dir=args.source, output_dir=args.output, site_title=args.title)
