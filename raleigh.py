@@ -498,37 +498,53 @@ class Site:
         (self.output / blog_index).write_text(blog_html, encoding="utf-8")
         count += 1
 
-        # Generate index page listing posts
-        home_post_list = ""
-        for meta, _path in posts[:10]:
-            d = parse_date(meta.get("date", ""))
-            date_format = self._config.get("date_format", "%B %Y")
-            date_str = d.strftime(date_format) if d else ""
-            title = meta.get("title", "Untitled")
-            tag_links = " ".join(
-                f'<a href="/tags/{slugify(t)}.html">{t}</a>'
-                for t in (meta.get("tags") or [])
+        # Generate index page — behaviour depends on "home" config
+        home_mode = self._config.get("home", "page")
+
+        if home_mode == "page":
+            # index.html already generated from source/index.md in pages loop above
+            pass
+        elif home_mode == "blog":
+            # Full blog archive on home page
+            blog_index = self._config.get("blog_index", "blog.html")
+            index_html = self._format_page(
+                "Home",
+                "<h1>Blog Posts</h1>\n" + post_links,
             )
-            link_path = f"posts/{slugify(title)}.html"
-            home_post_list += (
-                f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
-                + (
-                    f'\n<p class="post-date">{date_str}'
-                    + (f"  · {tag_links}" if tag_links else "")
-                    + "</p>"
-                    if date_str or tag_links
-                    else ""
+            (self.output / "index.html").write_text(index_html, encoding="utf-8")
+            count += 1
+        else:
+            # Default/recent mode: show last N posts
+            home_post_list = ""
+            for meta, _path in posts[:10]:
+                d = parse_date(meta.get("date", ""))
+                date_format = self._config.get("date_format", "%B %Y")
+                date_str = d.strftime(date_format) if d else ""
+                title = meta.get("title", "Untitled")
+                tag_links = " ".join(
+                    f'<a href="/tags/{slugify(t)}.html">{t}</a>'
+                    for t in (meta.get("tags") or [])
                 )
-                + "\n</article>"
+                link_path = f"posts/{slugify(title)}.html"
+                home_post_list += (
+                    f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
+                    + (
+                        f'\n<p class="post-date">{date_str}'
+                        + (f"  · {tag_links}" if tag_links else "")
+                        + "</p>"
+                        if date_str or tag_links
+                        else ""
+                    )
+                    + "\n</article>"
+                )
+            blog_index = self._config.get("blog_index", "blog.html")
+            index_html = self._format_page(
+                "Home",
+                (home_post_list or "<p>No posts yet.</p>")
+                + f'<p style="margin-top:2rem"><a href="{blog_index}">View all posts →</a></p>',
             )
-        blog_index = self._config.get("blog_index", "blog.html")
-        index_html = self._format_page(
-            "Home",
-            (home_post_list or "<p>No posts yet.</p>")
-            + f'<p style="margin-top:2rem"><a href="{blog_index}">View all posts →</a></p>',
-        )
-        (self.output / "index.html").write_text(index_html, encoding="utf-8")
-        count += 1
+            (self.output / "index.html").write_text(index_html, encoding="utf-8")
+            count += 1
 
         # Generate per-page HTML for each post
         for meta, md_file in posts:
@@ -566,10 +582,27 @@ class Site:
         tag_dir.mkdir(parents=True, exist_ok=True)
         for t, items in sorted(tags.items()):
             items.sort(key=lambda x: x[1], reverse=True)
-            link_items = "".join(
-                f'<article class="post-entry"><h2><a href="/posts/{slugify(str(m.get("title", "")))}.html">{m.get("title", "Untitled")}</a></h2></article>\n'
-                for m, _d in items
-            )
+            link_items = ""
+            for m, d in items:
+                title = m.get("title", "Untitled")
+                date_format = self._config.get("date_format", "%B %Y")
+                date_str = d.strftime(date_format) if d else ""
+                tag_links = " ".join(
+                    f'<a href="/tags/{slugify(t)}.html">{t}</a>'
+                    for t in (m.get("tags") or [])
+                )
+                link_path = f"posts/{slugify(title)}.html"
+                link_items += (
+                    f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
+                    + (
+                        f'\n<p class="post-date">{date_str}'
+                        + (f"  · {tag_links}" if tag_links else "")
+                        + "</p>"
+                        if date_str or tag_links
+                        else ""
+                    )
+                    + "\n</article>\n"
+                )
             tag_html = self._format_page(
                 f"Posts tagged '{t}'",
                 f"<h1>Posts tagged '{t}'</h1>\n{link_items}",

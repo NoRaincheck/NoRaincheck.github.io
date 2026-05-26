@@ -1,0 +1,4 @@
+{
+  "fmt": { "include": ["**/*.md", "**/*.json", "**/*.yaml"] },
+  "formatter": { "lineWidth": 120 }
+}
