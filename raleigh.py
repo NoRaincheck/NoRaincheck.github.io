@@ -1,4 +1,35 @@
-"""Raleigh — minimal static site generator from markdown with front-matter."""
+"""Raleigh — minimal static site generator from markdown with front-matter.
+
+Usage:
+    python raleigh.py [source] [-o output] [--title title]
+
+    source      Root input directory (default: source)
+    -o output   Output directory (default: _site)
+    --title     Site title (overrides config.json)
+
+Directory layout (source):
+    index.md                    Homepage
+    posts/2026-05-26-post.md    Blog posts (date in front-matter)
+    about/index.md              Sub-pages
+    assets/                     Static files (copied verbatim)
+
+Config (config.json alongside source dir):
+    {
+        "site_title": "My Site",
+        "footer": "Built with Raleigh",
+        "nav": [{"name": "Home", "href": "/"}],
+        "home": "recent",            // "page" | "blog" | "recent"
+        "blog_index": "blog.html",
+        "date_format": "%B %Y",
+        "date_format_full": "%B %d, %Y"
+    }
+
+Key components:
+    parse_front_matter  — Extract YAML-like front-matter + body from markdown
+    md_to_html          — Convert markdown text to HTML (no external deps)
+    Site                — Generator class orchestrating build, pages, posts, tags
+    main                — CLI entry point
+"""
 
 from __future__ import annotations
 
