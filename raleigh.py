@@ -136,8 +136,8 @@ def md_to_html(md_text: str) -> str:
                 code_lines.append(escaped)
                 i += 1
             lang = m.group(1) or ""
-            tag = "pre" if not lang else f'pre class="language-{lang}"'
-            html_parts.append(f"<{tag}><code>{''.join(code_lines)}\n</code></{tag}>")
+            lang_attr = f' class="language-{lang}"' if lang else ""
+            html_parts.append(f"<pre{lang_attr}><code>{''.join(code_lines)}\n</code></pre>")
             current_block = []
             i += 1
             continue
