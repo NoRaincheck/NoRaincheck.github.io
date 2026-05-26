@@ -137,7 +137,7 @@ def md_to_html(md_text: str) -> str:
                 i += 1
             lang = m.group(1) or ""
             lang_attr = f' class="language-{lang}"' if lang else ""
-            html_parts.append(f"<pre{lang_attr}><code>{''.join(code_lines)}\n</code></pre>")
+            html_parts.append(f"<pre{lang_attr}><code>{chr(10).join(code_lines)}\n</code></pre>")
             current_block = []
             i += 1
             continue
