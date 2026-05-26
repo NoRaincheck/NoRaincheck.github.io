@@ -556,7 +556,7 @@ class Site:
                     f'<a href="/tags/{slugify(t)}.html">{t}</a>'
                     for t in (meta.get("tags") or [])
                 )
-                link_path = f"posts/{slugify(title)}.html"
+                link_path = f"/posts/{slugify(title)}.html"
                 home_post_list += (
                     f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
                     + (
@@ -622,7 +622,7 @@ class Site:
                     f'<a href="/tags/{slugify(t)}.html">{t}</a>'
                     for t in (m.get("tags") or [])
                 )
-                link_path = f"posts/{slugify(title)}.html"
+                link_path = f"/posts/{slugify(title)}.html"
                 link_items += (
                     f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
                     + (
