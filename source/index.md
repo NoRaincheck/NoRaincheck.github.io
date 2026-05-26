@@ -1,3 +1,11 @@
+---
+title: Home
+---
+
+<div align=center>
+<img width="200" src="../assets/noraincheck_profile.png"/>
+</div>
+
 **Welcome to my blog**
 
 A collection of thoughts - short essays, reflections, personal opinions\
@@ -18,3 +26,14 @@ just by doing to minimal requirements well, we can return to a place where
 software is sane, afterall despite all this amazing progress, why I can't I run
 modern software on my 15+ year old computer? Do I really need 16gb RAM when I
 used to make do with < 2gb?
+
+---
+
+## Sections
+
+- [**Blog**](blog.html) — Posts organized by year
+- [**Experiments**](experiments.html) — Experiments, code dumps, and vibe coding
+- [**Looking Forward**](looking-forward.html) — Future projects and ideas
+- [**My Setup**](my-setup.html) — Tools, configs, and preferences
+- [**Bookmarks**](bookmarks.html) — Useful resources I refer back to
+- [**Tutorials**](tutorials/nvim.html) — Learning notes (NVim/Vim)

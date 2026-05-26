@@ -1,0 +1,62 @@
+---
+title: Thinking Local LLMs and AI
+date: 2025-12-01
+tags: ["LLM", "CLI", "ML"]
+---
+
+## Thinking Local LLMs and AI
+
+_December 2025_
+
+Running models locally is nothing new. Infact I've always had a particular
+affinity to `llama.cpp`. Recently, there is the newly introduced local text to
+image (z-image-turbo) generation model that can 'comfortable' be run locally
+(albeit perhaps a bit slow without a dedicated GPU).
+
+Usage would look something like (using `justfile` to template it) using
+`stable-diffusion.cpp`:
+
+```sh
+[no-cd]
+sd_generate:
+    PROMPT=$(gum input --placeholder "prompt for image generation"); \
+    OUTPUT=$(gum input --placeholder "output png file"); \
+    DYLD_LIBRARY_PATH=/path/to/dyld/library \
+    sd --difffusion-model z_image_turbo-Q4_0.gguf \
+    --vae /path/diffusion_pytorch_model.safetensors \
+    --llm Qwen3-4B-Instruct-2507-Q6_K.gguf \
+    --cfg-scale 1.0 \
+    --offload-to-cpu \
+    --diffusion-fa \
+    -H 512 -W 512 --steps 9 \
+    -p "$PROMPT" \
+    -o "$OUTPUT"
+```
+
+On M1 Macbook Pro with offload cpu enabled it will take roughly 2 minutes per a
+step, whereas not offloading will improve performance at the cost of memory
+consumption (n.b. you should have `--offload-to-cpu` turned on if you are using
+a low memory variant).
+
+Similarly, it is possible and perhaps desireable to using `llama.cpp` via CLI.
+One random project I want to do with Helix is abstracting over it so that we can
+use it to generate text by automatically looking up context in directory. This
+will probably be a mini-project (think of it as an extension of
+[smart-cat](https://github.com/efugier/smartcat))
+
+```sh
+$ llama-cli -m /path/to/llm.gguf -n 1 -p "hello how are you" -no-cnv
+```
+
+One of the challenging aspects is if the conversation is multi-turn we would
+need to format the prompt (`-p`) to use the chatml template. Having a way to
+build this up in an intelligent manner is a discussion for another day (is it
+possible to do it easily via `gum` with `justfile`? Maybe?). Another alternative
+is to make use of `aider` with helix with the `fs_watcher_lsp` -- this is
+probably the more natural way to approach it. If we were to implement it
+ourselves, a way to do this is to imitate the approach taken by aider chat by
+using [Universal Ctags](github.com/universal-ctags/ctags) or
+[tree sitter](https://github.com/grantjenks/py-tree-sitter-languages) which
+builds a map for the whole code repository which uses an LLM to figure out which
+particular _file_ is of interest and then sends the relevant contents to the
+LLM.
