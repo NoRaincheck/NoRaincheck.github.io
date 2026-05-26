@@ -96,7 +96,12 @@ def md_to_html(md_text: str) -> str:
             code_lines: list[str] = []
             i += 1
             while i < n and not lines[i].strip().startswith("```"):
-                escaped = lines[i].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                escaped = (
+                    lines[i]
+                    .replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                )
                 code_lines.append(escaped)
                 i += 1
             lang = m.group(1) or ""
@@ -140,7 +145,9 @@ def md_to_html(md_text: str) -> str:
                 table_lines.append(row_text)
                 i += 1
             rows: list[list[str]] = []
-            hdr_len = max(1, len([c for c in table_lines[0].split("|")[1:-1] if c.strip()]))
+            hdr_len = max(
+                1, len([c for c in table_lines[0].split("|")[1:-1] if c.strip()])
+            )
             for tl in table_lines:
                 cells = [c.strip() for c in tl.split("|")[1:-1] if c.strip()]
                 # Ensure trailing pipe gives correct count
@@ -154,7 +161,9 @@ def md_to_html(md_text: str) -> str:
                     "<tr>" + "".join(f"<td>{_inline(c)}</td>" for c in row) + "</tr>"
                     for row in rows[1:]
                 )
-                html_parts.append(f'<table><thead><tr>{header_cells}</tr></thead><tbody>{body_rows}</tbody></table>')
+                html_parts.append(
+                    f"<table><thead><tr>{header_cells}</tr></thead><tbody>{body_rows}</tbody></table>"
+                )
             continue
 
         # Blockquote
@@ -370,8 +379,11 @@ class Site:
 
     def _nav_links(self) -> str:
         links = [
-            ("Home", "/"), ("Blog", "blog.html"), ("Experiments", "experiments.html"),
-            ("Looking Forward", "looking-forward.html"), ("My Setup", "my-setup.html"),
+            ("Home", "/"),
+            ("Blog", "blog.html"),
+            ("Experiments", "experiments.html"),
+            ("Looking Forward", "looking-forward.html"),
+            ("My Setup", "my-setup.html"),
             ("Bookmarks", "bookmarks.html"),
         ]
         return " ".join(f'<a href="{h}">{n}</a>' for n, h in links)
@@ -379,9 +391,13 @@ class Site:
     def _sidebar_items(self) -> str:
         items = []
         for name, href in [
-            ("Home", "/"), ("Blog", "blog.html"), ("Experiments", "experiments.html"),
-            ("Looking Forward", "looking-forward.html"), ("My Setup", "my-setup.html"),
-            ("Bookmarks", "bookmarks.html"),             ("Tutorials", "nvim.html"),
+            ("Home", "/"),
+            ("Blog", "blog.html"),
+            ("Experiments", "experiments.html"),
+            ("Looking Forward", "looking-forward.html"),
+            ("My Setup", "my-setup.html"),
+            ("Bookmarks", "bookmarks.html"),
+            ("Tutorials", "nvim.html"),
         ]:
             items.append(f'<li><a href="{href}">{name}</a></li>')
         return "\n".join(items)
@@ -400,7 +416,9 @@ class Site:
     def build(self) -> int:
         """Generate the entire site. Returns number of pages written."""
         if not self.source.is_dir():
-            print(f"Error: source directory {self.source} does not exist", file=sys.stderr)
+            print(
+                f"Error: source directory {self.source} does not exist", file=sys.stderr
+            )
             return 0
 
         # Collect all markdown files with front-matter
@@ -457,7 +475,7 @@ class Site:
             if year_str != current_year:
                 if current_year is not None:
                     post_links += "</ul>\n\n"
-                post_links += f'<h2>{year_str}</h2>\n<ul>\n'
+                post_links += f"<h2>{year_str}</h2>\n<ul>\n"
                 current_year = year_str
             date_str = d.strftime("%B %Y") if d else ""
             title = meta.get("title", "Untitled")
@@ -465,9 +483,13 @@ class Site:
             link_path = f"posts/{slugify(title)}.html"
             post_links += (
                 f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
-                + (f'\n<p class="post-date">{date_str}'
-                   + (f'  · <span>{tag_list}</span>' if tag_list else "")
-                   + "</p>" if date_str or tag_list else "")
+                + (
+                    f'\n<p class="post-date">{date_str}'
+                    + (f"  · <span>{tag_list}</span>" if tag_list else "")
+                    + "</p>"
+                    if date_str or tag_list
+                    else ""
+                )
                 + "\n</article>\n"
             )
         if current_year:
@@ -490,9 +512,13 @@ class Site:
             link_path = f"posts/{slugify(title)}.html"
             home_post_list += (
                 f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
-                + (f'\n<p class="post-date">{date_str}'
-                   + (f'  · <span>{tag_list}</span>' if tag_list else "")
-                   + "</p>" if date_str or tag_list else "")
+                + (
+                    f'\n<p class="post-date">{date_str}'
+                    + (f"  · <span>{tag_list}</span>" if tag_list else "")
+                    + "</p>"
+                    if date_str or tag_list
+                    else ""
+                )
                 + "\n</article>"
             )
         index_html = self._format_page(
@@ -511,13 +537,14 @@ class Site:
             d = parse_date(meta.get("date", ""))
             date_str = d.strftime("%B %d, %Y") if d else ""
             tags = meta.get("tags", []) or []
-            tag_list = ", ".join(f'<span>{t}</span>' for t in tags)
+            tag_list = ", ".join(f"<span>{t}</span>" for t in tags)
 
             post_html = self._format_page(
                 title,
                 f'<h1>{title}</h1>\n<p class="post-date">{date_str}'
                 + (f"  · {tag_list}" if tag_list else "")
-                + "</p>\n\n" + html_body,
+                + "</p>\n\n"
+                + html_body,
             )
             out_path = self.output / "posts" / f"{slugify(title)}.html"
             out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -527,7 +554,7 @@ class Site:
         # Generate tag index pages
         tags: dict[str, list[tuple[dict, date]]] = {}
         for meta, _path in posts:
-            for t in (meta.get("tags") or []):
+            for t in meta.get("tags") or []:
                 d = parse_date(meta.get("date", "")) or date.min
                 tags.setdefault(str(t), []).append((meta, d))
 
@@ -559,8 +586,12 @@ def main(argv: list[str] | None = None) -> int:
         prog="raleigh",
         description="Minimal static site generator from markdown with front-matter.",
     )
-    parser.add_argument("source", nargs="?", default="source", help="Source directory (default: source)")
-    parser.add_argument("-o", "--output", default="_site", help="Output directory (default: _site)")
+    parser.add_argument(
+        "source", nargs="?", default="source", help="Source directory (default: source)"
+    )
+    parser.add_argument(
+        "-o", "--output", default="_site", help="Output directory (default: _site)"
+    )
     parser.add_argument("--title", default="NoRaincheck", help="Site title")
 
     args = parser.parse_args(argv)
