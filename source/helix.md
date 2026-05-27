@@ -95,6 +95,8 @@ Notable differences from Vim:
 - `v` enters **select mode** (equivalent to Vim's visual mode)
 - `C` copies the selection to the clipboard
 - `Alt` + `hjkl` moves between **split windows**
+- `g` (go-to) + `h` moves to the **start of the line**
+- `g` (go-to) + `l` moves to the **end of the line**
 - `:` opens the command mode (similar to Vim)
 
 ### Switching from Vim
