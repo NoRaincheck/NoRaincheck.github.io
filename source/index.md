@@ -36,4 +36,4 @@ used to make do with < 2gb?
 - [**Looking Forward**](looking-forward.html) — Future projects and ideas
 - [**My Setup**](my-setup.html) — Tools, configs, and preferences
 - [**Bookmarks**](bookmarks.html) — Useful resources I refer back to
-- [**Tutorials**](tutorials/nvim.html) — Learning notes (NVim/Vim)
+- [**Tutorials**](tutorials/helix.html) — Moving from Vim to Helix

@@ -4,7 +4,7 @@ title: Looking Forward
 
 # In Progress
 
-- [Neovim Tutorial](tutorials/nvim.html)
+- [Helix Tutorial](tutorials/helix.html)
 
 # Ideas
 

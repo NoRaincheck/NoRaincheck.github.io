@@ -12,6 +12,6 @@
     { "name": "Looking Forward", "href": "/looking-forward.html" },
     { "name": "My Setup", "href": "/my-setup.html" },
     { "name": "Bookmarks", "href": "/bookmarks.html" },
-    { "name": "Tutorials", "href": "/nvim.html" }
+    { "name": "Tutorials", "href": "/helix.html" }
   ]
 }
