@@ -431,7 +431,10 @@ class Site:
             css=css_escaped,
             nav_links=self._nav_links(),
             sidebar_items=self._sidebar_items(),
-            footer=self._config.get("footer", "Built with Raleigh"),
+            footer=self._config.get(
+                "footer",
+                '<a href="https://noraincheck.github.io/kitnega/raleigh/">Built with Raleigh</a>',
+            ),
             content=content,
         )
 
