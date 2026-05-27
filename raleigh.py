@@ -70,7 +70,7 @@ def parse_front_matter(text: str) -> tuple[dict | None, str]:
         val_raw = line[colon_idx + 1 :].strip()
         try:
             meta[key] = json.loads(val_raw)
-        except (json.JSONDecodeError, ValueError):
+        except json.JSONDecodeError, ValueError:
             meta[key] = val_raw
 
     return meta or None, body
@@ -640,20 +640,18 @@ class Site:
             if idx > 0:
                 prev_title = posts[idx - 1][0].get("title", "Untitled")
                 parts.append(
-                    f'<a href="{self.base_url}posts/{post_slugs[idx - 1]}.html">'
-                    f'« Previous: {prev_title}</a>'
+                    f'<a href="{self.base_url}posts/{post_slugs[idx - 1]}.html">« Previous: {prev_title}</a>'
                 )
             else:
-                parts.append('<span>« Previous</span>')
+                parts.append("<span>« Previous</span>")
             # Next = older (index + 1)
             if idx < len(posts) - 1:
                 next_title = posts[idx + 1][0].get("title", "Untitled")
                 parts.append(
-                    f'<a href="{self.base_url}posts/{post_slugs[idx + 1]}.html">'
-                    f'Next: {next_title} »</a>'
+                    f'<a href="{self.base_url}posts/{post_slugs[idx + 1]}.html">Next: {next_title} »</a>'
                 )
             else:
-                parts.append('<span>Next »</span>')
+                parts.append("<span>Next »</span>")
             return '<div class="post-nav">' + "\n".join(parts) + "</div>"
 
         # Generate per-page HTML for each post
@@ -679,7 +677,8 @@ class Site:
                 + (f"  · {tag_links}" if tag_links else "")
                 + "</p>\n\n"
                 + html_body
-                + "\n\n" + _post_nav(idx),
+                + "\n\n"
+                + _post_nav(idx),
             )
             out_path = self.output / "posts" / f"{slugify(title)}.html"
             out_path.parent.mkdir(parents=True, exist_ok=True)
