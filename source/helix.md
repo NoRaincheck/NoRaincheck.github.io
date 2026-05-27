@@ -4,8 +4,8 @@ title: Tutorials - Helix
 
 ## Moving to Helix
 
-[Helix](https://helix-editor.com/) (`hx`) is a modern modal editor built in Rust.
-Unlike Vim/Neovim, Helix ships with a built-in LSP client, tree-sitter
+[Helix](https://helix-editor.com/) (`hx`) is a modern modal editor built in
+Rust. Unlike Vim/Neovim, Helix ships with a built-in LSP client, tree-sitter
 integration, and multiple cursor support out of the box — no plugins required.
 
 ### Why Helix over Vim/Neovim?
@@ -15,21 +15,22 @@ integration, and multiple cursor support out of the box — no plugins required.
 - **Tree-sitter natively** — syntax highlighting, text objects, and navigation
   all use tree-sitter. No plugins needed.
 - **Multiple cursors** — a first-class feature, not an afterthought.
-- **Built-in file picker** — fuzzy finding via `fzf`-like interface, no Telescope.
+- **Built-in file picker** — fuzzy finding via `fzf`-like interface, no
+  Telescope.
 - **Selection-driven editing** — Helix flips the Vim model: motions extend the
   selection first, then you act on it. This is more intuitive once you adjust.
 
 ### Key Differences from Vim
 
-| Concept | Vim / Neovim | Helix |
-|---|---|---|
-| **Normal mode** | motions act immediately | motions extend the selection |
-| **Insert mode** | `i` to enter | `i` enters insert (same) |
-| **Select then act** | `d2w` (delete 2 words) | `2w` extends selection, `d` deletes it |
-| **File explorer** | Requires plugin | Built-in `<space>f` or `:open` |
-| **LSP** | Plugin required | Built-in, auto-configured |
-| **Config** | Lua / Vimscript | `~/.config/helix/config.toml` |
-| **Language config** | Per-plugin setup | `~/.config/helix/languages.toml` |
+| Concept             | Vim / Neovim            | Helix                                  |
+| ------------------- | ----------------------- | -------------------------------------- |
+| **Normal mode**     | motions act immediately | motions extend the selection           |
+| **Insert mode**     | `i` to enter            | `i` enters insert (same)               |
+| **Select then act** | `d2w` (delete 2 words)  | `2w` extends selection, `d` deletes it |
+| **File explorer**   | Requires plugin         | Built-in `<space>f` or `:open`         |
+| **LSP**             | Plugin required         | Built-in, auto-configured              |
+| **Config**          | Lua / Vimscript         | `~/.config/helix/config.toml`          |
+| **Language config** | Per-plugin setup        | `~/.config/helix/languages.toml`       |
 
 ### Getting Started
 
@@ -109,17 +110,17 @@ This means `dd` (delete line) becomes `xd` (extend to full line, then delete).
 
 Vim muscle memory refresher:
 
-| Action | Vim | Helix |
-|---|---|---|
-| Delete line | `dd` | `xd` |
-| Delete 2 words | `d2w` | `2wd` |
-| Yank line | `yy` | `xy` |
-| Change inside brackets | `ci(` | `mi(d` |
-| Comment toggle | `gc` (with plugin) | `gc` (built-in) |
-| Format file | `gg=G` (with plugin) | `:fmt` |
-| Find files | Requires plugin | `<space>f` |
-| LSP goto def | `gd` (with plugin) | `<space>gd` |
-| LSP rename | `grn` (with plugin) | `<space>r` |
+| Action                 | Vim                  | Helix           |
+| ---------------------- | -------------------- | --------------- |
+| Delete line            | `dd`                 | `xd`            |
+| Delete 2 words         | `d2w`                | `2wd`           |
+| Yank line              | `yy`                 | `xy`            |
+| Change inside brackets | `ci(`                | `mi(d`          |
+| Comment toggle         | `gc` (with plugin)   | `gc` (built-in) |
+| Format file            | `gg=G` (with plugin) | `:fmt`          |
+| Find files             | Requires plugin      | `<space>f`      |
+| LSP goto def           | `gd` (with plugin)   | `<space>gd`     |
+| LSP rename             | `grn` (with plugin)  | `<space>r`      |
 
 ### Official Resources
 
