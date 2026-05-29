@@ -70,7 +70,7 @@ def parse_front_matter(text: str) -> tuple[dict | None, str]:
         val_raw = line[colon_idx + 1 :].strip()
         try:
             meta[key] = json.loads(val_raw)
-        except json.JSONDecodeError, ValueError:
+        except (json.JSONDecodeError, ValueError):
             meta[key] = val_raw
 
     return meta or None, body
@@ -340,6 +340,8 @@ strong, b { color: #ed8796; font-weight: 700; }
 table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
 th, td { border: 1px solid #5b6078; padding: 0.5em 0.75em; text-align: left; }
 th { background: #363a4f; font-weight: 600; color: #cad3f5; }
+a { color: #8aadf4; text-decoration: none; }
+a:hover { text-decoration: underline; }
 blockquote {
     margin: 1rem 0; padding: 0.5rem 1rem;
     border-left: 4px solid #6e738d; color: #b8c0e0;
@@ -424,10 +426,19 @@ class Site:
         return {}
 
     def _abs(self, path: str) -> str:
-        """Prepend base_url to an absolute path."""
+        """Prepend base_url to an absolute path.
+
+        Always returns a path starting with ``/`` so it resolves correctly
+        regardless of the current page's directory depth (fixes double
+        ``posts/posts/…`` links on post-detail pages).
+        """
         if not path.startswith("/"):
             return path
-        return self.base_url + path.lstrip("/")
+        base = self.base_url.rstrip("/")
+        url_path = path.lstrip("/")
+        if base:
+            return f"{base}/{url_path}"
+        return "/" + url_path
 
     def _nav_links(self) -> str:
         links = self._config.get("nav", [{"name": "Home", "href": "/"}])
@@ -529,7 +540,7 @@ class Site:
                 f'<a href="{self._abs("/tags/" + slugify(t) + ".html")}">{t}</a>'
                 for t in (meta.get("tags") or [])
             )
-            link_path = f"{self.base_url}posts/{slugify(title)}.html"
+            link_path = self._abs("/posts/" + slugify(title) + ".html")
             post_links += (
                 f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
                 + (
@@ -569,7 +580,7 @@ class Site:
                         f'<a href="{self._abs("/tags/" + slugify(t) + ".html")}">{t}</a>'
                         for t in (meta.get("tags") or [])
                     )
-                    link_path = f"{self.base_url}posts/{slugify(title)}.html"
+                    link_path = self._abs("/posts/" + slugify(title) + ".html")
                     home_post_list += (
                         f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
                         + (
@@ -640,7 +651,7 @@ class Site:
             if idx > 0:
                 prev_title = posts[idx - 1][0].get("title", "Untitled")
                 parts.append(
-                    f'<a href="{self.base_url}posts/{post_slugs[idx - 1]}.html">« Previous: {prev_title}</a>'
+                    f'<a href="{self._abs("/posts/" + post_slugs[idx - 1] + ".html")}">« Previous: {prev_title}</a>'
                 )
             else:
                 parts.append("<span>« Previous</span>")
@@ -648,7 +659,7 @@ class Site:
             if idx < len(posts) - 1:
                 next_title = posts[idx + 1][0].get("title", "Untitled")
                 parts.append(
-                    f'<a href="{self.base_url}posts/{post_slugs[idx + 1]}.html">Next: {next_title} »</a>'
+                    f'<a href="{self._abs("/posts/" + post_slugs[idx + 1] + ".html")}">Next: {next_title} »</a>'
                 )
             else:
                 parts.append("<span>Next »</span>")
@@ -705,7 +716,7 @@ class Site:
                     f'<a href="{self._abs("/tags/" + slugify(t) + ".html")}">{t}</a>'
                     for t in (m.get("tags") or [])
                 )
-                link_path = f"{self.base_url}posts/{slugify(title)}.html"
+                link_path = self._abs("/posts/" + slugify(title) + ".html")
                 link_items += (
                     f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
                     + (
