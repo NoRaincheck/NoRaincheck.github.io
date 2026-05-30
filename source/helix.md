@@ -60,12 +60,22 @@ theme = "catppuccin_macchiato"
 line-number = "relative"
 cursorline = true
 color-modes = true
-true-color = true
+end-of-line-diagnostics = "hint"
 
 [editor.cursor-shape]
 insert = "bar"
 normal = "block"
 select = "underline"
+
+[editor.indent-guides]
+render = true
+
+[editor.inline-diagnostics]
+cursor-line = "warning"
+other-lines = "warning"
+
+[editor.lsp]
+display-messages = true
 ```
 
 ### Language Configuration
@@ -75,6 +85,15 @@ Language servers, formatters, and tree-sitter grammars are configured in
 [language config docs](https://docs.helix-editor.com/languages.html).
 
 ```toml
+
+[language-server.ty]
+command = "uvx"
+args = ["--from", "ty", "ty", "server"]
+
+[[language]]
+name = "python"
+language-servers = ["ty"]
+
 [language-server.rust-analyzer]
 command = "rust-analyzer"
 
@@ -121,6 +140,11 @@ Vim muscle memory refresher:
 | Find files             | Requires plugin      | `<space>f`      |
 | LSP goto def           | `gd` (with plugin)   | `<space>gd`     |
 | LSP rename             | `grn` (with plugin)  | `<space>r`      |
+
+### Other things
+
+- `miw` select current word
+- `vgl` select to end of line (`gh` for beginning of line)
 
 ### Official Resources
 
