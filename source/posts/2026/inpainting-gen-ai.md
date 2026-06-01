@@ -1,6 +1,7 @@
 ---
 title: Inpainting with Generative AI
 date: 2026-06-01
+tags: ["ML", "image-generation", "CLI"]
 ---
 
 ## Inpainting with Generative AI
