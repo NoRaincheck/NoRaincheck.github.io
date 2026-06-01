@@ -13,7 +13,23 @@ The easiest way to use CLI/scripting has definitely been `stable-diffusion.cpp`:
 For inpainting, it looks like the below
 
 ```sh
-./bin/sd-cli --diffusion-model flux-2-klein-9b-Q4_0.gguf --vae flux2_dev_diffusion_pytorch_model.safetensors  --llm Qwen3-8B-Q3_K_M.gguf --init-img bench.jpg --mask dog-bench-mask.png -p "a lovely dog" --cfg-scale 2 --sampling-method euler -t 24 --color --steps 9 -H 512 -W 512 --vae-tiling --vae-tile-overlap 0.125 -o dog-lovely-bench.png
+./bin/sd-cli \
+  --diffusion-model flux-2-klein-9b-Q4_0.gguf \
+  --vae flux2_dev_diffusion_pytorch_model.safetensors \
+  --llm Qwen3-8B-Q3_K_M.gguf \
+  --init-img bench.jpg \
+  --mask dog-bench-mask.png \
+  -p "a lovely dog" \
+  --cfg-scale 2 \
+  --sampling-method euler \
+  -t 24 \
+  --color \
+  --steps 9 \
+  -H 512 \
+  -W 512 \
+  --vae-tiling \
+  --vae-tile-overlap 0.125 \
+  -o dog-lovely-bench.png
 ```
 
 What is important (to me) is that I find that binary masks that 'grows a bit' is better than providing a fuzzy mask, on my hardware this runs reasonably quickly (~15s per step at 512x512). 
