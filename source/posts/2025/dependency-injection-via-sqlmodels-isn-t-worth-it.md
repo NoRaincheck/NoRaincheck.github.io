@@ -1,7 +1,7 @@
 ---
 title: Dependency Injection via SQLModels isn't worth it
 date: 2025-02-01
-tags: ["FastAPI", "Go"]
+tags: ["FastAPI"]
 ---
 
 ## Dependency Injection via SQLModels isn't worth it

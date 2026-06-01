@@ -1,7 +1,7 @@
 ---
 title: A look at Campfire for self-hosted Slack alternative
 date: 2026-03-01
-tags: ["SQLite", "Docker", "FastAPI", "ML"]
+tags: ["SQLite", "Docker", "FastAPI"]
 ---
 
 ## A look at Campfire for self-hosted Slack alternative

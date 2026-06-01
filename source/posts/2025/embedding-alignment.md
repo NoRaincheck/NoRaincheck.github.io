@@ -1,7 +1,7 @@
 ---
 title: Embedding Alignment
 date: 2025-08-01
-tags: ["Go", "ML", "embeddings", "Matrix"]
+tags: ["ML", "embeddings"]
 ---
 
 ## Embedding Alignment

@@ -1,7 +1,7 @@
 ---
 title: My Custom Iosevka Font
 date: 2025-05-01
-tags: ["ML"]
+tags: ["fonts"]
 ---
 
 ## My Custom Iosevka Font

@@ -1,7 +1,7 @@
 ---
 title: Examining Pokemon AI as Inspiration for Scoring Systems
 date: 2025-11-01
-tags: ["LLM", "Go"]
+tags: ["LLM"]
 ---
 
 ## Examining Pokemon AI as Inspiration for Scoring Systems

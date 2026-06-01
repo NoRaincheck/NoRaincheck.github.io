@@ -1,7 +1,7 @@
 ---
 title: Constrained Procedural Generation
 date: 2026-05-01
-tags: ["Python", "Go", "procedural-generation"]
+tags: ["Python", "procedural-generation"]
 ---
 
 ## Constrained Procedural Generation

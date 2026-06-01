@@ -1,7 +1,7 @@
 ---
 title: Ralph Loop and Frequent Intentional Context Compaction
 date: 2026-02-01
-tags: ["LLM", "Python", "Go"]
+tags: ["LLM", "Python"]
 ---
 
 ## Ralph Loop and Frequent Intentional Context Compaction

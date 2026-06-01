@@ -1,7 +1,7 @@
 ---
 title: Inlay Hints and LSPs
 date: 2025-06-01
-tags: ["LLM", "Python", "Go"]
+tags: ["Python", "Go"]
 ---
 
 ## Inlay Hints and LSPs

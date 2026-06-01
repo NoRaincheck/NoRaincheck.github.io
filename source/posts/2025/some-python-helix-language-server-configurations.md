@@ -1,7 +1,7 @@
 ---
 title: Some Python Helix Language Server Configurations
 date: 2025-11-01
-tags: ["Python", "ML"]
+tags: ["Python"]
 ---
 
 ## Some Python Helix Language Server Configurations

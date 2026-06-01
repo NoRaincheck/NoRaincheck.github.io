@@ -1,7 +1,7 @@
 ---
 title: LLMs - in Review (2024)
 date: 2024-12-01
-tags: ["LLM", "self-hosting", "production", "Go", "ML", "embeddings", "ONNX"]
+tags: ["LLM", "self-hosting", "production", "ML", "embeddings", "ONNX"]
 ---
 
 ## LLMs - in Review (2024)

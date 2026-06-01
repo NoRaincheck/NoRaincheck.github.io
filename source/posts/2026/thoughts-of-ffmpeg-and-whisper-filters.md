@@ -1,7 +1,7 @@
 ---
 title: Thoughts of ffmpeg and whisper filters
 date: 2026-01-01
-tags: ["CLI", "Go", "ML"]
+tags: ["CLI", "ML"]
 ---
 
 ## Thoughts of ffmpeg and whisper filters

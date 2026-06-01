@@ -1,7 +1,7 @@
 ---
 title: What if I tried self-hosting LLM Code Tooling?
 date: 2025-07-01
-tags: ["LLM", "self-hosting", "CLI", "tooling", "Go", "ML"]
+tags: ["LLM", "self-hosting", "CLI", "tooling", "ML"]
 ---
 
 ## What if I tried self-hosting LLM Code Tooling?

@@ -1,7 +1,7 @@
 ---
 title: Syncify Python Async Functions
 date: 2025-04-01
-tags: ["Python", "async", "Go"]
+tags: ["Python", "async"]
 ---
 
 ## Syncify Python Async Functions

@@ -1,7 +1,7 @@
 ---
 title: Python & TypeScript - in Review (2024)
 date: 2024-12-01
-tags: ["production", "Python", "CLI", "tooling", "FastAPI", "Go", "ML"]
+tags: ["production", "Python", "CLI", "tooling", "FastAPI", "ML"]
 ---
 
 ## Python & TypeScript - in Review (2024)

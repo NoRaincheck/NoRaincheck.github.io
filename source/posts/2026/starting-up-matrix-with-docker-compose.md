@@ -1,7 +1,7 @@
 ---
 title: Starting Up Matrix with Docker Compose
 date: 2026-03-01
-tags: ["self-hosting", "Docker", "CLI", "ML", "Matrix"]
+tags: ["self-hosting", "Docker", "CLI", "Matrix"]
 ---
 
 ## Starting Up Matrix with Docker Compose

@@ -1,7 +1,7 @@
 ---
 title: A quick look at `onnxscript`
 date: 2025-08-01
-tags: ["Go", "ONNX", "Matrix"]
+tags: ["ONNX"]
 ---
 
 ## A quick look at `onnxscript`

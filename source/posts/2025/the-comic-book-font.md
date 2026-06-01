@@ -1,7 +1,7 @@
 ---
 title: The Comic Book Font
 date: 2025-03-01
-tags: ["LLM", "fonts", "CLI", "MCP", "Go", "ML", "TTS"]
+tags: ["fonts"]
 ---
 
 ## The Comic Book Font

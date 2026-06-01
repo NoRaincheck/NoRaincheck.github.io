@@ -1,7 +1,7 @@
 ---
 title: Faster AutoML Random Search
 date: 2025-12-01
-tags: ["Go", "ML"]
+tags: ["ML"]
 ---
 
 ## Faster AutoML Random Search
