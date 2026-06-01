@@ -1,4 +1,10 @@
 {
   "fmt": { "include": ["**/*.md", "**/*.json", "**/*.yaml"] },
-  "formatter": { "lineWidth": 120 }
+  "formatter": { "lineWidth": 120 },
+  "tasks": {
+    "build": "python3 raleigh.py",
+    "serve": "deno run --allow-net --allow-read jsr:@std/http@1/file-server _site",
+    "test": "deno test --allow-net --allow-read --allow-write --allow-run --allow-env --allow-sys tests/site_test.ts",
+    "test:e2e": "python3 raleigh.py && deno test --allow-net --allow-read --allow-write --allow-run --allow-env --allow-sys tests/site_test.ts"
+  }
 }
