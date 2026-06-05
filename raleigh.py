@@ -354,6 +354,12 @@ blockquote {
 .post-nav a { color: #8aadf4; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.3rem; }
 .post-nav a:hover { color: #b7bdf8; }
 .post-nav .nav-label { color: #6e738d; font-size: 0.8rem; display: block; }
+.site-footer {
+    background: #1e2030; color: #6e738d;
+    padding: 0.75rem 1.5rem;
+    text-align: center;
+}
+.site-footer a { color: #a5adcb; }
 @media (max-width: 768px) {
     .wrapper { grid-template-columns: 1fr; }
     .sidebar { position: static; border-bottom: 1px solid #5b6078; padding-bottom: 1rem; margin-bottom: 1rem; }
