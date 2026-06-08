@@ -15,7 +15,7 @@ title: Looking Forward
   [Dungeon Tileset II](https://0x72.itch.io/dungeontileset-ii). We can try
   [DALL-E 3 to TRELLIS](https://trellis3d.github.io/) pipeline with
   [Mixamo](https://www.mixamo.com/) for Animations with Blender to generate the
-  spritesheets.
+  spritesheets. Or using Odin: https://odin-lang.org/news/calling-odin-from-python/
 - Perform Chinese Word Segmentation on arbitary text for building an application
   to learn chinese better. See
   [Chinese word-segmented writing](https://en.wikipedia.org/wiki/Chinese_word-segmented_writing)
