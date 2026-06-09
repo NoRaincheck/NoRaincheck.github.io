@@ -20,15 +20,6 @@ and sometimes lose track of it; things mostly **not** written by me
 
 ---
 
-Personal Mantra: I'm trying to simplify my headspace, and strip software
-development down to the essentials. Things are too bloated nowadays and maybe,
-just by doing to minimal requirements well, we can return to a place where
-software is sane, afterall despite all this amazing progress, why I can't I run
-modern software on my 15+ year old computer? Do I really need 16gb RAM when I
-used to make do with < 2gb?
-
----
-
 ## Sections
 
 - [**Blog**](blog.html) — Posts organized by year
