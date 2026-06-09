@@ -107,6 +107,7 @@ def md_to_html(md_text: str) -> str:
         rendered = _render_block(block_lines)
         if rendered:
             html_parts.append(rendered)
+        block_lines.clear()
 
     current_block: list[str] = []
 
