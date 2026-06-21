@@ -9,6 +9,10 @@ back to.
 
 ---
 
+### Super Resolution
+
+Real Super Resolution models are surprisingly accessible: https://github.com/xinntao/Real-ESRGAN
+
 ### The Catherine Project
 
 Very rarely does something come along that makes me think about lifelong
