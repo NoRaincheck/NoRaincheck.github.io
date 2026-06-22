@@ -31,3 +31,63 @@ Even if we take the median wage of $100k, which after tax is ~$75k — not much 
 > "60% of current renters will never own property. It's going to be mass poverty." — [u/512165381](https://old.reddit.com/r/AusFinance/comments/1sjyg3y/are_ordinary_people_going_to_be_living_in_poverty/), r/[AusFinance](https://old.reddit.com/r/AusFinance/comments/1sjyg3y/are_ordinary_people_going_to_be_living_in_poverty/) (14 upvotes)
 
 > "Where are increasingly in a K Economy, the wealth disparity is increasing." — [u/KangarooBeard](https://old.reddit.com/r/AusFinance/comments/1sjyg3y/are_ordinary_people_going_to_be_living_in_poverty/), r/[AusFinance](https://old.reddit.com/r/AusFinance/comments/1sjyg3y/are_ordinary_people_going_to_be_living_in_poverty/) (7 upvotes)
+
+### Austerity Shopping Cart
+
+As an example, it is certainly possible to aggressively pare down grocery costs. For example, if we concentrate on staples (lentils, eggs, rice, peanut butter, wombok, apples, oatmeal, milk + salt/pepper)
+
+**Assumptions for 1 person** (moderate activity, ~2000-2500+ kcal/day):
+- Batch cook rice + lentils every 2-3 days.
+- ~3-4 eggs/day average, generous wombok/apples, milk for cooking/porridge.
+- **Week 1** includes bulk dry goods top-up (one-time larger buy for pantry base).
+- Weeks 2-4: Regular fresh + restock top-ups.
+- Added basic **instant coffee** and **tea bags**.
+- Total estimated weekly cost after Week 1: **$35-55**.
+
+#### Week 1: Dry + Regular (Pantry Build + Fresh)
+
+**Dry goods (bulk for 4+ weeks base):**
+- Dry lentils (red split): 2-3 kg → **$8-10**
+- White rice (5kg bag): 1 bag → **$10-15**
+- Rolled oats: 1-2 kg → **$5-8**
+- Peanut butter (375-500g jar): 2 jars → **$8-10**
+
+**Regular/Fresh:**
+- Eggs: 2-3 dozen → **$12-20**
+- Milk (2L): 4-6 x 2L → **$10-15**
+- Wombok: 2-3 heads → **$5-8**
+- Apples: 2-3 kg → **$8-12**
+- Instant coffee: 1 jar → **$5-8**
+- Tea bags (box of 50-100): 1-2 boxes → **$3-6**
+
+**Week 1 Total Estimate: $75-110** (heavier due to dry stock-up).
+
+#### Week 2: Regular Top-Up
+
+- Eggs: 2 dozen → **$11-16**
+- Milk: 4 x 2L → **$8-12**
+- Wombok: 2 heads → **$4-7**
+- Apples: 2 kg → **$6-10**
+- Peanut butter: 1 jar (if needed) → **$4-5**
+- Oats: 500g-1kg top-up (if low) → **$3-5**
+- Instant coffee/tea: Top-up if needed → **$3-5**
+
+**Week 2 Total Estimate: $40-55**
+
+#### Week 3: Regular Top-Up
+
+- Eggs: 2 dozen
+- Milk: 4-5 x 2L
+- Wombok: 2 heads
+- Apples: 2 kg
+- Lentils/rice: Small 500g-1kg top-up if low (~$3-5)
+- Peanut butter/oats: As needed
+- Coffee/tea: Minimal top-up
+
+**Week 3 Total Estimate: $35-50**
+
+#### Week 4: Regular Top-Up
+
+Same pattern as Weeks 2-3. Reassess dry goods at end of month for next bulk buy.
+**Week 4 Total Estimate: $35-50**
+
