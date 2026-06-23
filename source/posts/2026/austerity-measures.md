@@ -6,7 +6,7 @@ tags: ["economics", "personal-finance", "cost-of-living", "inflation", "consumer
 
 In today's world we're reaching higher and higher levels of inflation and unemployment. This, coupled with growing uncertainty and declining confidence in corporate white-collar work due to continual layoffs, has got me thinking that a "two-income" household isn't really "two-income" at all. It's more like a one-income household with a backup plan. Given the pervasiveness of consumerism and social media culture, it would be surprising for the average person not to believe they should be living in austerity.
 
-> "We are already in the 'working poor' phase." — [u/Visible_Concert382](https://old.reddit.com/r/AusFinance/comments/1sjyg3y/are_ordinary_people_going_to_be_living_in_poverty/), r/[AusFinance](https://old.reddit.com/r/AusFinance/comments/1sjyg3y/are_ordinary_people_going_to_be_living_in_poverty/) (1083 upvotes)
+> "We are already in the 'working poor' phase." — [u/VisibleConcert382](https://old.reddit.com/r/AusFinance/comments/1sjyg3y/are_ordinary_people_going_to_be_living_in_poverty/), r/[AusFinance](https://old.reddit.com/r/AusFinance/comments/1sjyg3y/are_ordinary_people_going_to_be_living_in_poverty/) (1083 upvotes)
 
 I think more and more, 'success' at a high level will come from living well below your means. The reality is that the average household is basically on the poverty line, sustained only by financial credit. This in itself isn't a "new" idea or observation, but I think the overwhelming burden on the middle class still goes under-discussed. It pains me to think that the general public and media commentators don't push this thinking enough.
 
@@ -14,11 +14,11 @@ I think more and more, 'success' at a high level will come from living well belo
 
 What happens if one person in the household loses their job? 
 
-> "We just lost 60% of our household income after husband lost his job. Thankfully pulling it back to barebones we can still cover 4 walls so it'll be tight but hopefully husband can get another job soon!" — [u/Huge_Interaction_778](https://old.reddit.com/r/AusFinance/comments/1sjyg3y/are_ordinary_people_going_to_be_living_in_poverty/), r/[AusFinance](https://old.reddit.com/r/AusFinance/comments/1sjyg3y/are_ordinary_people_going_to_be_living_in_poverty/) (8 upvotes)
+> "We just lost 60% of our household income after husband lost his job. Thankfully pulling it back to barebones we can still cover 4 walls so it'll be tight but hopefully husband can get another job soon!" — [u/HugeInteraction778](https://old.reddit.com/r/AusFinance/comments/1sjyg3y/are_ordinary_people_going_to_be_living_in_poverty/), r/[AusFinance](https://old.reddit.com/r/AusFinance/comments/1sjyg3y/are_ordinary_people_going_to_be_living_in_poverty/) (8 upvotes)
 
 What if both people lose their job?
 
-> "I am now in the 'working poor' category. I work enough to cut out the bismal Jobseeker payment, but not enough to pay the minimum I need to pay each fortnight just to cover bills, obligations and living expenses." — [u/F_I_N_E_](https://old.reddit.com/r/AusFinance/comments/1sjyg3y/are_ordinary_people_going_to_be_living_in_poverty/), r/[AusFinance](https://old.reddit.com/r/AusFinance/comments/1sjyg3y/are_ordinary_people_going_to_be_living_in_poverty/) (13 upvotes)
+> "I am now in the 'working poor' category. I work enough to cut out the bismal Jobseeker payment, but not enough to pay the minimum I need to pay each fortnight just to cover bills, obligations and living expenses." — [u/FINE](https://old.reddit.com/r/AusFinance/comments/1sjyg3y/are_ordinary_people_going_to_be_living_in_poverty/), r/[AusFinance](https://old.reddit.com/r/AusFinance/comments/1sjyg3y/are_ordinary_people_going_to_be_living_in_poverty/) (13 upvotes)
 
 Would your current level of spending hold up without employment (i.e., living in poverty?) 
 
