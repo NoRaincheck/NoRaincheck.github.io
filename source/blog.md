@@ -6,6 +6,14 @@ title: Blog
 
 ## 2026
 
+- [Vibe Benchmarks](posts/2026/vibe-benchmarks.html) — July 2026
+- [OpenCV 5 Python Bindings Is Here](posts/2026/opencv-5-is-here.html) —
+  July 2026
+- [Austerity Measures](posts/2026/austerity-measures.html) — June 2026
+- [Inpainting with Generative AI](posts/2026/inpainting-gen-ai.html) — June
+  2026
+- [On Syntax-Guided Program Reduction](posts/2026/syntax-reduction-and-mimo.html)
+  — June 2026
 - [Constrained Procedural Generation](posts/2026/constrained-procedural-generation.html)
   — May 2026
 - [Testing Go with Monty (Python)](posts/2026/testing-go-with-monty-python.html)
@@ -52,6 +60,8 @@ title: Blog
 - [Maintaining Scripts using Just and Gum](posts/2025/maintaining-scripts-using-just-and-gum.html)
   — April 2025
 - [The Comic Book Font](posts/2025/the-comic-book-font.html) — March 2025
+- [Setting SQL for Feature Transformations as a Standard](posts/2025/setting-sql-for-feature-transformations-as-a-standard.html)
+  — March 2025
 - [Dependency Injection via SQLModels isn't worth it](posts/2025/dependency-injection-via-sqlmodels-isnt-worth-it.html)
   — February 2025
 - [rqlite - a Production Experiment](posts/2025/rqlite-a-production-experiment.html)

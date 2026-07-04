@@ -1,7 +1,7 @@
 ---
 title: OpenCV 5 Python Bindings Is Here
 date: 2026-07-01
-tags: ["python", "opencv"]
+tags: ["Python", "OpenCV"]
 ---
 
 ## OpenCV 5 Python Bindings Is Here
