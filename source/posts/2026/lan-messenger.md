@@ -1,7 +1,7 @@
 ---
 title: LAN Messenger and Agents
 date: 2026-08-08
-tags: [home-lab, xmpp, p2p, agents]
+tags: ["home-lab", "xmpp", "p2p", "agents"]
 ---
 
 Been thinking about home-lab setups for agents and finally settled on: [pi-msg](https://github.com/NoRaincheck/pi-msg).
