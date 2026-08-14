@@ -4,7 +4,7 @@ title: Looking Forward
 
 # In Progress
 
-- [Helix Tutorial](tutorials/helix.html)
+- [Helix Tutorial](https://noraincheck.github.io/helixert/)
 
 # Ideas
 
