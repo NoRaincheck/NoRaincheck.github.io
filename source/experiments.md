@@ -238,6 +238,61 @@ if __name__ == "__main__":
 
 ```
 
+Output
+
+```
+=== watermarked output ===
+Gravity is a fundamental force of nature that attracts two objects with mass toward each other. It is a universal force that shapes the structure of the universe, from the smallest subatomic particles to the vast expanses of galaxies. Gravity is responsible for many everyday phenomena, such as the falling of objects, the orbits of planets, and the stability of the Earth's shape.
+
+In the context of the universe, gravity is what causes matter to clump together, forming stars, planets, and galaxies. It also plays a crucial role in the evolution of the cosmos, influencing the formation of cosmic structures and the distribution of matter.
+
+There are several types of gravity, including:
+
+* Newtonian gravity: A classical theory that describes the force of gravity as a universal constant, acting between all objects with mass.
+* General relativity: A theory developed by Albert Einstein that describes gravity as the curvature of spacetime caused by massive objects.
+* Dark matter: A type of matter that does not
+
+=== negative-seed output ===
+Gravity is a fundamental force of nature that attracts any two objects with mass toward each other. It is one of the four fundamental forces of nature, alongside electromagnetism, the strong nuclear force, and the weak nuclear force. Gravity is responsible for the motion of planets, the orbits of comets, and the collapse of stars. It also affects the trajectory of projectiles, the movement of objects in space, and the formation of structures like galaxies and solar systems. In general relativity, gravity is described as the curvature of spacetime caused by mass and energy, which influences the motion of objects within it.
+
+=== plain output (baseline) ===
+Gravity is a fundamental force of nature that attracts two objects with mass toward each other. It is a universal force that governs the motion of planets, stars, and other celestial bodies, as well as the behavior of objects on Earth. Gravity is responsible for the orbits of planets around the Sun, the tides on Earth, and the stability of the Earth's orbit around the Sun.
+
+In physics, gravity is described by Newton's law of universal gravitation, which states that every mass attracts every other mass with a force proportional to the product of their masses and inversely proportional to the square of the distance between them. This law explains many phenomena, including the motion of comets, asteroids, and planets, as well as the behavior of objects in space.
+
+Gravity also plays a crucial role in the formation of galaxies and the structure of the universe on large scales. It is a key factor in the way stars form and evolve, and it continues to shape the cos
+
+=== detection ===
+watermarked, correct key  : Hash(134/200 frac=0.670 z=+4.8)
+watermarked, wrong key    : Hash(91/200 frac=0.455 z=-1.3)
+negative-seed, correct key: Hash(71/126 frac=0.563 z=+1.4)
+plain, correct key        : Hash(109/200 frac=0.545 z=+1.3)
+
+=== hash across splits of watermarked text ===
+from tok | key                              neg key                         
+      19 | Hash(127/181 frac=0.702 z=+5.4) Hash(82/181 frac=0.453 z=-1.3)
+      46 | Hash(107/154 frac=0.695 z=+4.8) Hash(69/154 frac=0.448 z=-1.3)
+      76 | Hash(87/124 frac=0.702 z=+4.5) Hash(60/124 frac=0.484 z=-0.4)
+     102 | Hash(67/98 frac=0.684 z=+3.6) Hash(52/98 frac=0.531 z=+0.6)
+     128 | Hash(50/72 frac=0.694 z=+3.3) Hash(40/72 frac=0.556 z=+0.9)
+
+=== hash across splits of negative-seed text ===
+from tok | key                              neg key                         
+      20 | Hash(45/106 frac=0.425 z=-1.6) Hash(64/106 frac=0.604 z=+2.1)
+      48 | Hash(33/78 frac=0.423 z=-1.4) Hash(48/78 frac=0.615 z=+2.0)
+      70 | Hash(24/56 frac=0.429 z=-1.1) Hash(35/56 frac=0.625 z=+1.9)
+      97 | Hash(11/29 frac=0.379 z=-1.3) Hash(19/29 frac=0.655 z=+1.7)
+
+=== hash across splits of plain text ===
+from tok | key                              neg key                         
+      19 | Hash(102/181 frac=0.564 z=+1.7) Hash(70/181 frac=0.387 z=-3.0)
+      49 | Hash(85/151 frac=0.563 z=+1.5) Hash(59/151 frac=0.391 z=-2.7)
+      80 | Hash(65/120 frac=0.542 z=+0.9) Hash(47/120 frac=0.392 z=-2.4)
+     128 | Hash(42/72 frac=0.583 z=+1.4) Hash(27/72 frac=0.375 z=-2.1)
+     156 | Hash(25/44 frac=0.568 z=+0.9) Hash(18/44 frac=0.409 z=-1.2)
+     180 | Hash(12/20 frac=0.600 z=+0.9) Hash(10/20 frac=0.500 z=+0.0)
+```
+
 ## Speech Diarizer
 
 A fairly vanilla speech diarizer without torch or unusual dependencies. Only
