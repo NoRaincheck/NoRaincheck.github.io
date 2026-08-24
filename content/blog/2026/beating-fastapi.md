@@ -1,10 +1,10 @@
 ---
 title: Beating FastAPI
 date: 2026-07-15
-tags: ["Python", "FastAPI", "Performance", "Go"]
+tags: ["Python", "FastAPI", "performance", "Go"]
 ---
 
-One thing which Go does a lot better than Python is single binary deployments. As an [experiment](https://github.com/NoRaincheck/gofre) I thought, why not have a way to package up Go as part of a Python package, similar to [maturin](https://www.maturin.rs/) - and also have a way to spin up a Python webserver that is packaged as a Go binary. 
+One thing which Go does a lot better than Python is single binary deployments. As an [experiment](https://github.com/NoRaincheck/gofre) I thought, why not have a way to package up Go as part of a Python package, similar to [maturin](https://www.maturin.rs/) - and also have a way to spin up a Python webserver that is packaged as a Go binary.
 
 The results were definitely interesting:
 

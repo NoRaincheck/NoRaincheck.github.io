@@ -1,7 +1,7 @@
 ---
 title: Vibe Benchmarks
 date: 2026-07-04
-tags: ["LLM", "Coding", "Benchmarks"]
+tags: ["LLM", "coding", "benchmarks"]
 ---
 
 ## Vibe Benchmarks
