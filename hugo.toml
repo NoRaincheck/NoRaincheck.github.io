@@ -1,0 +1,84 @@
+# Base URL used when generating links to your pages
+baseURL = "https://noraincheck.github.io/"
+
+theme = 'hugo-bearblog'
+
+# Basic metadata configuration for your blog.
+title = "NoRaincheck"
+author = "NoRaincheck"
+copyright = "NoRaincheck"
+locale = "en-US"
+
+# Generate a nice robots.txt for SEO
+enableRobotsTXT = true
+
+# Bearblog-style setup: no /tags/ index page, but individual term pages remain
+disableKinds = ["taxonomy"]
+ignoreErrors = ["error-disable-taxonomy"]
+
+# Keep blog post URLs identical to the pre-Hugo site (/posts/<slug>/),
+# and keep tag term pages under /tags/.
+[permalinks]
+  blog = "/posts/:slugorfilename/"
+  tags = "/tags/:slug"
+
+[params]
+  # The "description" of your website. This is used in the meta data of your generated html.
+  description = "A collection of thoughts, experiments, bookmarks and notes."
+
+  # Another "title" :-). This one is used as the site_name on the Hugo's internal
+  # opengraph structured data template.
+  title = "NoRaincheck"
+
+  # The theme displays dates like "02 Jan, 2006" by default; keep the old
+  # "%B %Y" style instead (e.g. "March 2026").
+  dateFormat = "January 2006"
+
+  # Show a previous/next navigator at the end of each blog post.
+  enablePostNavigator = true
+
+[menus]
+[[menus.main]]
+  name = "Home"
+  pageRef = "/"
+  weight = 10
+[[menus.main]]
+  name = "Blog"
+  pageRef = "/blog"
+  weight = 20
+[[menus.main]]
+  name = "Experiments"
+  pageRef = "/experiments"
+  weight = 30
+[[menus.main]]
+  name = "Looking Forward"
+  pageRef = "/looking-forward"
+  weight = 40
+[[menus.main]]
+  name = "My Setup"
+  pageRef = "/my-setup"
+  weight = 50
+[[menus.main]]
+  name = "Bookmarks"
+  pageRef = "/bookmarks"
+  weight = 60
+[[menus.main]]
+  name = "Tutorials"
+  pageRef = "/helix"
+  weight = 70
+[[menus.main]]
+  name = "Quotes"
+  pageRef = "/quotes"
+  weight = 80
+
+# Configure markup highlighter to match "Bearblog" aesthetics, see
+# https://gohugo.io/configuration/markup/#highlight
+[markup]
+  [markup.highlight]
+    style = 'friendly'
+    lineNos = true
+    lineNumbersInTable = false
+    codeFences = true
+  [markup.goldmark.renderer]
+    # Allow raw HTML in markdown content (e.g. centered images on the home page).
+    unsafe = true

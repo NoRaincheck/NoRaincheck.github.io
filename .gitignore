@@ -1,4 +1,9 @@
-_site/
+# Hugo build output
+public/
+resources/
+.hugo_build.lock
+
+# Misc
 .DS_Store
 test-results/
 playwright-report/
