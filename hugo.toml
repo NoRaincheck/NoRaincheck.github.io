@@ -70,12 +70,19 @@ ignoreErrors = ["error-disable-taxonomy"]
   name = "Quotes"
   pageRef = "/quotes"
   weight = 80
+[[menus.main]]
+  name = "About"
+  pageRef = "/about"
+  weight = 90
 
-# Configure markup highlighter to match "Bearblog" aesthetics, see
-# https://gohugo.io/configuration/markup/#highlight
+# Configure markup highlighter to follow the Catppuccin Macchiato palette.
+# Classes are emitted (noClasses = false) so the matching Chroma stylesheet,
+# embedded in layouts/partials/style.html, drives the code colours.
+# Regenerate with: hugo gen chromastyles --style=catppuccin-macchiato
 [markup]
   [markup.highlight]
-    style = 'friendly'
+    style = 'catppuccin-macchiato'
+    noClasses = false
     lineNos = true
     lineNumbersInTable = false
     codeFences = true

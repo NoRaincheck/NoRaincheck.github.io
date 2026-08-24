@@ -1,0 +1,47 @@
+{{ define "main" }}
+{{ $posts := where site.RegularPages "Type" "blog" }}
+{{ $sorted := $posts.ByDate.Reverse }}
+{{ if gt (len $sorted) 0 }}
+  {{ $latest := index $sorted 0 }}
+  <h1>{{ $latest.Title }}</h1>
+  <p>
+    <i>
+      <time datetime='{{ $latest.Date.Format "2006-01-02" }}'>
+        {{ $latest.Date.Format (default "02 Jan, 2006" site.Params.dateFormat) }}
+      </time>
+    </i>
+  </p>
+  <content>
+    {{ $latest.Content }}
+  </content>
+
+  <p>
+    {{ range ($latest.GetTerms "tags") }}
+    <a href="{{ .Permalink }}">#{{ .LinkTitle }}</a>&nbsp;
+    {{ end }}
+  </p>
+
+  {{ $rest := first 5 (after 1 $sorted) }}
+  {{ if gt (len $rest) 0 }}
+  <hr />
+  <h2>More posts</h2>
+  <ul class="blog-posts">
+    {{ range $rest }}
+    <li>
+      <span>
+        <i>
+          <time datetime='{{ .Date.Format "2006-01-02" }}'>
+            {{ .Date.Format (default "02 Jan, 2006" site.Params.dateFormat) }}
+          </time>
+        </i>
+      </span>
+      <a href="{{ .Permalink }}">{{ .Title }}</a>
+    </li>
+    {{ end }}
+  </ul>
+  {{ end }}
+  <small><a href="{{ "blog" | relURL }}">All posts →</a></small>
+{{ else }}
+  <p>No posts yet. See the <a href="{{ "blog" | relURL }}">archive</a>.</p>
+{{ end }}
+{{ end }}
