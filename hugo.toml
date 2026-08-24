@@ -7,20 +7,20 @@ theme = 'hugo-bearblog'
 title = "NoRaincheck"
 author = "NoRaincheck"
 copyright = "NoRaincheck"
-languageCode = "en-US"
+locale = "en-US"
 
 # Generate a nice robots.txt for SEO
 enableRobotsTXT = true
+
+# Bearblog-style setup: no /tags/ index page, but individual term pages remain
+disableKinds = ["taxonomy"]
+ignoreErrors = ["error-disable-taxonomy"]
 
 # Keep blog post URLs identical to the pre-Hugo site (/posts/<slug>/),
 # and keep tag term pages under /tags/.
 [permalinks]
   blog = "/posts/:slugorfilename/"
   tags = "/tags/:slug"
-
-# Bearblog-style setup: no /tags/ index page, but individual term pages remain
-disableKinds = ["taxonomy"]
-ignoreErrors = ["error-disable-taxonomy"]
 
 [params]
   # The "description" of your website. This is used in the meta data of your generated html.
