@@ -3,7 +3,7 @@ title: Home
 ---
 
 <div align=center>
-<img width="200" src="../assets/noraincheck_profile.png"/>
+<img width="200" src="/assets/noraincheck_profile.png"/>
 </div>
 
 **Welcome to my blog**
@@ -22,9 +22,9 @@ and sometimes lose track of it; things mostly **not** written by me
 
 ## Sections
 
-- [**Blog**](blog.html) — Posts organized by year
-- [**Experiments**](experiments.html) — Experiments, code dumps, and vibe coding
-- [**Looking Forward**](looking-forward.html) — Future projects and ideas
-- [**My Setup**](my-setup.html) — Tools, configs, and preferences
-- [**Bookmarks**](bookmarks.html) — Useful resources I refer back to
-- [**Tutorials**](tutorials/helix.html) — Moving from Vim to Helix
+- [**Blog**](/blog/) — Posts organized by year
+- [**Experiments**](/experiments/) — Experiments, code dumps, and vibe coding
+- [**Looking Forward**](/looking-forward/) — Future projects and ideas
+- [**My Setup**](/my-setup/) — Tools, configs, and preferences
+- [**Bookmarks**](/bookmarks/) — Useful resources I refer back to
+- [**Tutorials**](/helix/) — Moving from Vim to Helix
