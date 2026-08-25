@@ -1,0 +1,60 @@
+{{/* Blog post navigation.
+
+     The theme's default relies on .PrevInSection/.NextInSection, which are
+     unreliable here: posts live in per-year folders and the built-in section
+     neighbours break at collection edges (e.g. the oldest post renders a dead
+     "Next Post >>"). Compute the neighbours explicitly from the full,
+     date-sorted list of blog posts instead, so navigation always crosses
+     month and year boundaries. */}}
+{{ $posts := where site.RegularPages "Type" "blog" }}
+{{ $sorted := $posts.ByDate.Reverse }}{{/* newest first */}}
+{{ $idx := -1 }}
+{{ range $i, $p := $sorted }}
+  {{ if eq $p.Permalink $.Permalink }}{{ $idx = $i }}{{ end }}
+{{ end }}
+{{ $older := dict }}
+{{ $newer := dict }}
+{{ if ge $idx 0 }}
+  {{ if lt (add $idx 1) (len $sorted) }}{{ $older = index $sorted (add $idx 1) }}{{ end }}
+  {{ if gt $idx 0 }}{{ $newer = index $sorted (sub $idx 1) }}{{ end }}
+{{ end }}
+<div style="font-size:0.8em;display:flex;gap:16px;justify-content:center;">
+  <p>
+    {{ if $older.RelPermalink }}
+    <a href="{{ $older.Permalink }}">
+      << Previous Post</a>
+        {{ else }}
+        <strike>
+          << Previous Post</strike>
+            {{ end }}
+  </p>
+  <p>|</p>
+  <p>
+    {{ if $newer.RelPermalink }}
+    <a href="{{ $newer.Permalink }}">Next Post >></a>
+    {{ else }}
+    <strike>Next Post >></strike>
+    {{ end }}
+  </p>
+</div>
+{{/* Extra ways to keep reading: jump somewhere random or browse the archive.
+     The random target is picked client-side so every click is different; with
+     JavaScript disabled the link falls back to the blog archive. */}}
+<div style="font-size:0.8em;display:flex;gap:16px;justify-content:center;">
+  <p><a id="random-post-link" href="{{ "blog" | relURL }}">🎲 Random post</a></p>
+  <p>|</p>
+  <p><a href="{{ "blog" | relURL }}">All posts</a></p>
+</div>
+{{ $urls := slice }}
+{{ range $posts }}{{ $urls = $urls | append .Permalink }}{{ end }}
+<script>
+(function () {
+  var posts = {{ $urls | jsonify | safeJS }};
+  var link = document.getElementById("random-post-link");
+  if (!link) return;
+  link.addEventListener("click", function (event) {
+    event.preventDefault();
+    window.location.href = posts[Math.floor(Math.random() * posts.length)];
+  });
+})();
+</script>
