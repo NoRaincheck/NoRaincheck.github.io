@@ -74,6 +74,10 @@ ignoreErrors = ["error-disable-taxonomy"]
   name = "About"
   pageRef = "/about"
   weight = 90
+[[menus.main]]
+  name = "Agentic Engineering"
+  pageRef = "/agentic-engineering"
+  weight = 100
 
 # Configure markup highlighter to follow the Catppuccin Macchiato palette.
 # Classes are emitted (noClasses = false) so the matching Chroma stylesheet,

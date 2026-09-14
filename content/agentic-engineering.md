@@ -1,3 +1,9 @@
+---
+title: Agentic Engineering
+---
+
+*Based on [Agentic Engineering (Aug 2026)](https://kenn.io/blog/agentic-engineering-aug-2026/).*
+
 Agentic engineering follows a structured "research, plan, implement" loop. The key focus is distinguishing where a "human leans in" versus where an "agent runs it."
 
 * 🧠: Human leans in
