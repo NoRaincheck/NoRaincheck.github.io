@@ -9,6 +9,19 @@ back to.
 
 ---
 
+### Copilot with Local Provider
+
+```sh
+export COPILOT_PROVIDER_TYPE=openai
+export COPILOT_PROVIDER_BASE_URL=http://192.168.0.60:1234/v1
+export COPILOT_PROVIDER_API_KEY=unset
+export COPILOT_MODEL=qwen3.6-35b-a3b-mtp
+export COPILOT_OFFLINE=true
+
+# this should work
+copilot
+```
+
 ### Super Resolution
 
 Real Super Resolution models are surprisingly accessible: https://github.com/xinntao/Real-ESRGAN
