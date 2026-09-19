@@ -79,7 +79,7 @@ computer and workspaces things don't get confusing. Though the
 Stolen from [here](https://blog.gitbutler.com/how-git-core-devs-configure-git/).
 
 ```ini
-# ~/.gitconfig 
+# ~/.gitconfig
 [column]
     ui = auto
 [branch]
@@ -139,6 +139,24 @@ echo foo | gpg --symmetric > foo.gpg
 gpg --decrypt foo.gpg
 # to clipboard
 gpg --decrypt foo.gpg | pbcopy
+```
+
+## fnox with age+yubikey
+
+To do this, I'm using `age` with `age-plugin-yubikey`
+
+```sh
+brew install age age-plugin-yubikey fnox
+```
+
+To make it work with `fnox` do the startup with `age-plugin-yubikey`. Ensure that the resutling `age1yubikey1...` is placed in `~/.config/fnox/age.txt`.
+
+When you go through the `fnox init` the steps should be straight forward to follow. The resulting file should look something like:
+
+```toml
+[providers.age]
+type = "age"
+recipients = ["age1yubikey1..."]
 ```
 
 ## Misc
